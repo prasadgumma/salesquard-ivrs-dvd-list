@@ -13,9 +13,8 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import CancelIcon from "@mui/icons-material/Cancel";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid"; // Import UUID generator
-import { lightGreen } from "@mui/material/colors";
 
-const IvrsDidAddForm = ({ setOpenDrawer, setData, handleShow }) => {
+const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
   const [formData, setFormData] = useState({
     account: "",
     didType: "",

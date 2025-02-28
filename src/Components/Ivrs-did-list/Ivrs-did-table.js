@@ -9,6 +9,13 @@ import {
   Drawer,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  DialogActions,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Edit, Delete } from "@mui/icons-material";
@@ -35,9 +42,13 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
 
   const [openEditDrawer, setOpenEditDrawer] = useState(false);
   const [selectedDidData, setSelectedDidData] = useState(null);
-
+  const [rows, setRows] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [selectedModules, setSelectedModules] = useState([]);
+  const [moduleOptions, setModuleOptions] = useState([]);
+  const [editingRow, setEditingRow] = useState(null);
+  console.log(moduleOptions, "moduleOptions");
   const apiurl = process.env.REACT_APP_API_URL; // Your API URL
-
   // For pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -46,13 +57,6 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
   const paginatedRows =
     pageSize === "All" ? data : data?.slice(startIndex, startIndex + pageSize);
   const totalPages = pageSize === "All" ? 1 : Math.ceil(totalRows / pageSize);
-
-  useEffect(() => {
-    if (tableDidData) {
-      setData(tableDidData);
-      setLoading(false);
-    }
-  }, [tableDidData]);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -70,6 +74,101 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
     const newSize = event.target.value;
     setPageSize(newSize);
     setCurrentPage(1); // Reset to first page on size change
+  };
+
+  useEffect(() => {
+    if (tableDidData) {
+      setData(tableDidData);
+      setLoading(false);
+    }
+  }, [tableDidData]);
+
+  const handleOpen = (row) => {
+    setEditingRow(row);
+    // Pre-populate selectedModules if row.module exists
+    setSelectedModules(row.module ? row.module.split(", ") : []);
+    setOpen(true);
+    axios
+      .post(`${apiurl}/mtype_drp_did`, {
+        lml: "67a455659d796",
+      })
+      .then((response) => {
+        if (response?.data?.resp?.error_code === "0") {
+          // Assuming response.data.resp.mtype_drp_did is an array of objects with a 'typnm' property
+          const options = Array.isArray(response.data.resp.mtype_drp_did)
+            ? response.data.resp.mtype_drp_did.map((item) => item.typnm)
+            : [];
+          setModuleOptions(options);
+        } else {
+          console.error("API returned an error", response.data);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching module options:", error);
+      });
+  };
+
+  const handleModuleSave = async () => {
+    console.log(editingRow, "eRow");
+    if (editingRow) {
+      const modulesString = selectedModules.join(", ");
+      const updatedRow = { ...editingRow, module: modulesString };
+      setData((prevData) =>
+        prevData.map((row) =>
+          row.ivrsduniq === editingRow.ivrsduniq ? updatedRow : row
+        )
+      );
+
+      try {
+        const response = await axios.post(`${apiurl}/add_did_modules`, {
+          lml: "67a455659d796",
+          k: editingRow.ivrsduniq,
+          mod: selectedModules,
+        });
+        console.log(response, "ModRes");
+
+        if (response?.data?.resp?.error_code === "0") {
+          setSnackbar({
+            open: true,
+            message: "Modules updated successfully.",
+            severity: "success",
+          });
+        } else {
+          setSnackbar({
+            open: true,
+            message: "Failed to update modules on the backend.",
+            severity: "error",
+          });
+        }
+      } catch (error) {
+        console.error("Error updating modules:", error);
+        setSnackbar({
+          open: true,
+          message: "Failed to update modules.",
+          severity: "error",
+        });
+      }
+
+      // Reset the editing row and selected modules state
+      setEditingRow(null);
+      setSelectedModules([]);
+    }
+    // Finally, close the dialog
+    setOpen(false);
+  };
+
+  const handleClear = () => {
+    if (editingRow) {
+      const updatedRow = { ...editingRow, module: "" };
+      setData((prevData) =>
+        prevData.map((row) =>
+          row.ivrsduniq === editingRow.ivrsduniq ? updatedRow : row
+        )
+      );
+      setEditingRow(null);
+    }
+    setSelectedModules([]);
+    setOpen(false);
   };
 
   const handleCloseSnackbar = () => {
@@ -162,6 +261,13 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
       });
     }
   };
+  const handleToggle = (module) => {
+    setSelectedModules((prev) =>
+      prev.includes(module)
+        ? prev.filter((m) => m !== module)
+        : [...prev, module]
+    );
+  };
 
   const columns = [
     {
@@ -199,23 +305,34 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
     {
       field: "mtype",
       headerName: "Module",
-      width: 150,
+      width: 200,
       align: "center",
-      renderCell: () => (
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "green",
-            color: "white",
-            minWidth: 50,
-            display: "flex",
-            ml: 5,
-            mt: 0.5,
-          }}
-        >
-          +
-        </Button>
-      ),
+
+      renderCell: (params) => {
+        // Convert the module string to an array of modules
+        const modules = params.row.module ? params.row.module.split(", ") : [];
+
+        return (
+          <>
+            {/* The button to open the module selection dialog */}
+            <Button
+              onClick={() => handleOpen(params.row)}
+              variant="contained"
+              color="success"
+            >
+              +
+            </Button>
+            {/* Below the button, display an ordered list if there are any modules */}
+            {modules.length > 0 && (
+              <ol style={{ margin: 0, paddingLeft: "20px" }}>
+                {modules.map((mod, index) => (
+                  <li key={index}>{mod}</li>
+                ))}
+              </ol>
+            )}
+          </>
+        );
+      },
     },
     { field: "tspnm", headerName: "TSP", width: 120 },
     { field: "didnum", headerName: "DID Number", width: 150 },
@@ -440,6 +557,42 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                     onUpdate={handleUpdate}
                   />
                 </Box>
+
+                <Dialog open={open} maxWidth="sm" fullWidth>
+                  <DialogTitle>Modules</DialogTitle>
+                  <DialogContent>
+                    <FormGroup>
+                      {moduleOptions.map((module) => (
+                        <FormControlLabel
+                          key={module}
+                          control={
+                            <Checkbox
+                              checked={selectedModules.includes(module)}
+                              onChange={() => handleToggle(module)}
+                            />
+                          }
+                          label={module}
+                        />
+                      ))}
+                    </FormGroup>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleModuleSave}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={handleClear}
+                    >
+                      Clear
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </Card>
             </Grid>
           </Grid>
