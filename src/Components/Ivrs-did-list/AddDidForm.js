@@ -101,7 +101,6 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
   }, [formData.didType, formData.tsp]);
 
   const handleChange = (name, value) => {
-    console.log(name, value, "Change");
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -109,7 +108,6 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
     }));
   };
 
-  console.log(formData, "fdata");
   const handleSubmit = async () => {
     try {
       // Ensure required fields are present before sending request
@@ -144,11 +142,7 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
         agtyp: formData.agentType,
       };
 
-      console.log("Submitting Payload:", payload);
-
       const response = await axios.post(`${apiurl}/ivrs_did_add_v2`, payload);
-
-      console.log("Response:", response.data);
 
       if (response.data.resp.error_code !== "0") {
         console.error("API Error:", response.data.message);
@@ -162,7 +156,6 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
       alert("Something went wrong. Please try again.");
     }
   };
-  console.log(formData, "FData");
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box

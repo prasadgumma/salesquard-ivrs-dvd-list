@@ -4,7 +4,6 @@ import FilterDrawer from "./Components/Ivrs-did-list/filter-button-drower";
 
 const App = () => {
   const [filteredData, setFilteredData] = useState([]);
-  console.log(filteredData, "APPdata");
 
   const handleFilter = (data) => {
     setFilteredData(data);

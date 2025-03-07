@@ -47,7 +47,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
   const [selectedModules, setSelectedModules] = useState([]);
   const [moduleOptions, setModuleOptions] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
-  console.log(moduleOptions, "moduleOptions");
+
   const apiurl = process.env.REACT_APP_API_URL; // Your API URL
   // For pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -86,7 +86,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
   const handleOpen = (row) => {
     setEditingRow(row);
     // Pre-populate selectedModules if row.module exists
-    setSelectedModules(row.module ? row.module.split(", ") : []);
+    setSelectedModules(row.moduni !== null ? row?.moduni?.split(",") : []);
     setOpen(true);
     axios
       .post(`${apiurl}/mtype_drp_did`, {
@@ -94,9 +94,8 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
       })
       .then((response) => {
         if (response?.data?.resp?.error_code === "0") {
-          // Assuming response.data.resp.mtype_drp_did is an array of objects with a 'typnm' property
-          const options = Array.isArray(response.data.resp.mtype_drp_did)
-            ? response.data.resp.mtype_drp_did.map((item) => item.typnm)
+          const options = Array.isArray(response?.data?.resp?.mtype_drp_did)
+            ? response?.data?.resp?.mtype_drp_did.map((item) => item)
             : [];
           setModuleOptions(options);
         } else {
@@ -109,23 +108,30 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
   };
 
   const handleModuleSave = async () => {
-    console.log(editingRow, "eRow");
     if (editingRow) {
-      const modulesString = selectedModules.join(", ");
-      const updatedRow = { ...editingRow, module: modulesString };
-      setData((prevData) =>
-        prevData.map((row) =>
-          row.ivrsduniq === editingRow.ivrsduniq ? updatedRow : row
-        )
-      );
+      const modulesString = selectedModules?.join(", ");
+      const updatedRow = {
+        ...editingRow,
+        // module: modulesString,
+        modnms: modulesString,
+      };
+
+      // Generate current date and time in the required formats
+      const now = new Date();
+      const dt = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
+      const tm = now.toTimeString().split(" ")[0]; // "HH:MM:SS"
+      const dttm = `${dt} ${tm}`; // "YYYY-MM-DD HH:MM:SS"
 
       try {
         const response = await axios.post(`${apiurl}/add_did_modules`, {
-          lml: "67a455659d796",
-          k: editingRow.ivrsduniq,
-          mod: selectedModules,
+          lml: "67a455659d796", // Session value
+          k: editingRow.ivrsduniq, // Unique key for the DID row
+          mod: selectedModules, // Selected modules (as an array)
+          diduni: editingRow.diduni, // DID unique identifier (assumed available)
+          accuni: editingRow.accuni, // Account unique identifier (assumed available)
+          ip: "", // Set the IP value if available (or leave empty)
+          funm: "add_did_modules", // Function name
         });
-        console.log(response, "ModRes");
 
         if (response?.data?.resp?.error_code === "0") {
           setSnackbar({
@@ -133,6 +139,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
             message: "Modules updated successfully.",
             severity: "success",
           });
+          handleShow();
         } else {
           setSnackbar({
             open: true,
@@ -157,17 +164,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
     setOpen(false);
   };
 
-  const handleClear = () => {
-    if (editingRow) {
-      const updatedRow = { ...editingRow, module: "" };
-      setData((prevData) =>
-        prevData.map((row) =>
-          row.ivrsduniq === editingRow.ivrsduniq ? updatedRow : row
-        )
-      );
-      setEditingRow(null);
-    }
-    setSelectedModules([]);
+  const handleClose = () => {
     setOpen(false);
   };
 
@@ -185,7 +182,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
 
   const handleUpdate = async () => {
     if (!selectedRow) return; // Ensure a row is selected
-    console.log(selectedRow);
+
     // Build the payload. The 'action' field helps the backend decide the operation.
     const payload = {
       lml: "67a455659d796", // Replace with your actual session value
@@ -197,7 +194,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
 
     try {
       const response = await axios.post(`${apiurl}/ivrs_did_suspend`, payload);
-      console.log("API response", response.data);
+
       handleShow();
       // Optionally, update your UI or notify the user of success
     } catch (error) {
@@ -305,13 +302,12 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
     {
       field: "mtype",
       headerName: "Module",
-      width: 200,
+      width: 250,
       align: "center",
 
       renderCell: (params) => {
         // Convert the module string to an array of modules
         const modules = params.row.module ? params.row.module.split(", ") : [];
-
         return (
           <>
             {/* The button to open the module selection dialog */}
@@ -322,14 +318,8 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
             >
               +
             </Button>
-            {/* Below the button, display an ordered list if there are any modules */}
-            {modules.length > 0 && (
-              <ol style={{ margin: 0, paddingLeft: "20px" }}>
-                {modules.map((mod, index) => (
-                  <li key={index}>{mod}</li>
-                ))}
-              </ol>
-            )}
+
+            <p>{params.row.modnms}</p>
           </>
         );
       },
@@ -564,14 +554,14 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                     <FormGroup>
                       {moduleOptions.map((module) => (
                         <FormControlLabel
-                          key={module}
+                          key={module.typuni}
                           control={
                             <Checkbox
-                              checked={selectedModules.includes(module)}
-                              onChange={() => handleToggle(module)}
+                              checked={selectedModules?.includes(module.typuni)}
+                              onChange={() => handleToggle(module.typuni)}
                             />
                           }
-                          label={module}
+                          label={module.typnm}
                         />
                       ))}
                     </FormGroup>
@@ -587,9 +577,9 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                     <Button
                       variant="contained"
                       color="error"
-                      onClick={handleClear}
+                      onClick={handleClose}
                     >
-                      Clear
+                      Close
                     </Button>
                   </DialogActions>
                 </Dialog>

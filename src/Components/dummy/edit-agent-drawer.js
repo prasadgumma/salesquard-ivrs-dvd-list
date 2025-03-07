@@ -41,7 +41,6 @@ const EditAgentDrawer = ({
   const sessid = Cookies.get("sessid");
 
   useEffect(() => {
-    console.log("Data from backend:", data);
     if (data) {
       setFormData({
         name: data.nm || "", // Map 'nm' to 'name'
@@ -56,7 +55,6 @@ const EditAgentDrawer = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Updating ${name}:`, value);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 

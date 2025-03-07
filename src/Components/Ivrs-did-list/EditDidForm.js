@@ -77,7 +77,6 @@ const IvrsDidEditForm = ({
               tspid: formData.tspid,
             }),
           ]);
-        console.log("DID dropdown response:", didRes);
         setDropdownData({
           tsp: tspRes?.data?.resp?.tsp_list || [],
           account: accountRes?.data?.resp?.acc_users_call_log || [],
@@ -85,7 +84,6 @@ const IvrsDidEditForm = ({
           didType: didTypRes?.data?.resp?.did_type || [],
           did: didRes?.data?.resp?.did || [],
         });
-        console.log("Route Response:", routeRes);
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
       }
@@ -96,7 +94,7 @@ const IvrsDidEditForm = ({
 
   // Map incoming names to the actual keys in formData
   const handleChange = (name, value) => {
-    console.log(name, value);
+    name, value;
     let key = name;
     if (name === "account") key = "accuni";
     else if (name === "didType") key = "didtypuni";
@@ -117,7 +115,7 @@ const IvrsDidEditForm = ({
 
   const handleSubmit = async () => {
     try {
-      console.log(formData?.diduni);
+      formData?.diduni;
       const payload = {
         lml: "67a455659d796",
         k: MD5(formData.ivrsduniq).toString(),
@@ -131,12 +129,12 @@ const IvrsDidEditForm = ({
         agtyp: formData.agtyp,
       };
 
-      console.log("Payload:", payload);
+      "Payload:", payload;
       const response = await axios.post(
         `${apiurl}/ivrs_did_update_v1`,
         payload
       );
-      console.log("Response:", response.data);
+      "Response:", response.data;
 
       // if (response.data.resp.status === "FAIL") {
       //   console.error("API Error:", response.data.resp.message);
@@ -148,8 +146,8 @@ const IvrsDidEditForm = ({
       if (response.data.resp.status === "FAIL") {
         console.error("API Error:", response.data.resp.message);
       } else {
-        console.log("Updating row with ID:", formData.ivrsduniq);
-        // console.log("Existing Table Data:", data);
+        "Updating row with ID:", formData.ivrsduniq;
+        // ("Existing Table Data:", data);
 
         // setData((prevData) => {
         //   const newData = prevData.map((row) =>
@@ -176,7 +174,7 @@ const IvrsDidEditForm = ({
         //     return row;
         //   });
 
-        //   console.log("Updated Data:", newData);
+        //   ("Updated Data:", newData);
         //   return newData; // ✅ Ensure the new state is returned
         // });
         handleShow();

@@ -66,7 +66,6 @@ const FilterDrawer = () => {
   };
 
   const handleChange = (name, value) => {
-    console.log(value);
     if (name === "status") {
       // Status is a single value, so no need to use filter
       setFormData((prev) => ({

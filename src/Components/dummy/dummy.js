@@ -70,7 +70,7 @@
 //           ...(routeRes?.data?.resp?.route || []),
 //         ],
 //       });
-//       console.log(tspRes, "dropdownData");
+//       (tspRes, "dropdownData");
 //     } catch (error) {
 //       console.error("Error fetching dropdown data:", error);
 //     }
@@ -115,7 +115,7 @@
 //     }
 //   };
 
-//   console.log(tableDidData.length, "Tdata");
+//   (tableDidData.length, "Tdata");
 
 //   return (
 //     <>
@@ -483,7 +483,7 @@
 //   const handleShow = async () => {
 //     setLoading(true);
 //     setError(null);
-//     console.log(formData.account.length);
+//     (formData.account.length);
 //     try {
 //       const response = await axios.post(`${apiurl}/ivrs_did_list_v2`, {
 //         lml: "67a455659d796",
@@ -735,7 +735,7 @@
 //   };
 
 //   const handleChange = (name, value) => {
-//     console.log(value);
+//     (value);
 //     if (name === "status") {
 //       // Status is a single value, so no need to use filter
 //       setFormData((prev) => ({

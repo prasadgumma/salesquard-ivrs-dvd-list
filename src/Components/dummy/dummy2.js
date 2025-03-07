@@ -42,7 +42,7 @@
 
 // //   const [openEditDrawer, setOpenEditDrawer] = useState(false);
 // //   const [selectedDidData, setSelectedDidData] = useState();
-// //   console.log(data, "Data");
+// //   (data, "Data");
 
 // //   const handleOpenDialog = (row) => {
 // //     setData(row);
@@ -65,14 +65,14 @@
 // //           `${apiurl}/ivrs_did_list_v2`,
 // //           payload
 // //         );
-// //         console.log("API response", response.data);
+// //         ("API response", response.data);
 // //         // Optionally: add logic to update UI or notify the user upon success
 // //       } catch (error) {
 // //         console.error("API call error:", error);
 // //       }
 // //     } else {
 // //       // For resume functionality, you can add a similar Axios call if needed
-// //       console.log(
+// //       (
 // //         "Resume functionality is not integrated with an API call in this example."
 // //       );
 // //     }
@@ -85,7 +85,7 @@
 // //       setLoading(false);
 // //     }
 // //   }, [tableDidData]);
-// //   console.log(data);
+// //   (data);
 // //   const totalRows = data?.length;
 // //   const startIndex = (currentPage - 1) * pageSize;
 
@@ -122,16 +122,16 @@
 
 // //   const handleEditClick = async (row) => {
 // //     const datas = row.ivrsduniq;
-// //     console.log(datas);
-// //     console.log(MD5(datas).toString());
-// //     console.log(row, "row");
+// //     (datas);
+// //     (MD5(datas).toString());
+// //     (row, "row");
 // //     try {
 // //       const response = await axios.post(`${apiurl}/ivrs_did_elist`, {
 // //         lml: "67a455659d796",
 // //         k: MD5(row.ivrsduniq).toString(),
 // //       });
 
-// //       console.log(response?.data?.resp?.ivrsdidlist, "API Response");
+// //       (response?.data?.resp?.ivrsdidlist, "API Response");
 
 // //       if (response.status === 200) {
 // //         const AllDidData = response?.data?.resp?.ivrsdidlist;
@@ -154,7 +154,7 @@
 // //         k1: row.diduni, // Original unique identifier
 // //         sts: 1, // Status flag
 // //       });
-// //       console.log(response, "Res");
+// //       (response, "Res");
 // //       // Adjust condition based on your API's success response
 // //       if (response?.data?.resp?.error_code === "0") {
 // //         // Remove the deleted row from the state
@@ -380,7 +380,7 @@
 // //     },
 // //   ];
 
-// //   console.log(paginatedRows);
+// //   (paginatedRows);
 
 // //   return (
 // //     <>
@@ -639,7 +639,7 @@
 //   };
 
 //   const handleChange = (name, value) => {
-//     console.log(value);
+//     (value);
 //     if (name === "status") {
 //       // Status is a single value, so no need to use filter
 //       setFormData((prev) => ({
