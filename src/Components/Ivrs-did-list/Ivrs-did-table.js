@@ -112,7 +112,6 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
       const modulesString = selectedModules?.join(", ");
       const updatedRow = {
         ...editingRow,
-        // module: modulesString,
         modnms: modulesString,
       };
 
@@ -306,8 +305,6 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
       align: "center",
 
       renderCell: (params) => {
-        // Convert the module string to an array of modules
-        const modules = params.row.module ? params.row.module.split(", ") : [];
         return (
           <>
             {/* The button to open the module selection dialog */}
@@ -508,7 +505,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                   <Drawer
                     anchor="right"
                     open={openDrawer}
-                    onClose={() => setOpenDrawer(false)}
+                    onClose={() => setOpenDrawer(true)}
                   >
                     <Box sx={{ width: 500, p: 3 }}>
                       <IvrsDidAddForm
@@ -521,7 +518,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                   <Drawer
                     anchor="right"
                     open={openEditDrawer}
-                    onClose={() => setOpenEditDrawer(false)}
+                    onClose={() => setOpenEditDrawer(true)}
                   >
                     <Box sx={{ width: 500, p: 3 }}>
                       <IvrsDidEditForm

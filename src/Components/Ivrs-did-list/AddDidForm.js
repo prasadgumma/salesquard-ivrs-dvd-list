@@ -148,8 +148,9 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
         console.error("API Error:", response.data.message);
       } else {
         // setData((prevData) => [...prevData, payload]);
+        setOpenDrawer(false);
         handleShow();
-        setOpenDrawer(false); // Close drawer on success
+        // Close drawer on success
       }
     } catch (error) {
       console.error("Error submitting form:", error);

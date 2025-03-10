@@ -117,11 +117,11 @@ const CustomPagination = ({
       justifyContent="flex-end"
       alignItems="center"
       gap={3}
-      m={2}
+      m={1}
       sx={{
         backgroundColor: "#f7f7f7", // Light background for the entire pagination section
         borderRadius: "8px",
-        padding: "12px",
+        padding: "10px",
       }}
     >
       {/* Page Size Selector */}
