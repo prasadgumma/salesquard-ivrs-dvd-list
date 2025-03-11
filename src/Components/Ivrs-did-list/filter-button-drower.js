@@ -116,6 +116,8 @@ const FilterDrawer = () => {
     "& .MuiOutlinedInput-root": {
       borderRadius: "8px",
       backgroundColor: "#fff",
+      // width: "250px", // Set the desired width
+      height: "48px", // Set the desired height
       "& fieldset": { borderColor: "#ced4da" },
       "&:hover fieldset": { borderColor: "#a1a1a1" },
       "&.Mui-focused fieldset": { borderColor: "#1976d2" },
@@ -138,7 +140,7 @@ const FilterDrawer = () => {
 
   return (
     <>
-      <Box mt={2} mr={2} textAlign="end">
+      <Box mt={1} mr={2} textAlign="end">
         <Box
           p={2}
           sx={{
@@ -264,7 +266,7 @@ const FilterDrawer = () => {
                 color="primary"
                 onClick={handleShow}
                 fullWidth
-                sx={{ borderRadius: "8px", padding: "10px" }}
+                sx={{ borderRadius: "8px", padding: "6px" }}
               >
                 Show
               </Button>

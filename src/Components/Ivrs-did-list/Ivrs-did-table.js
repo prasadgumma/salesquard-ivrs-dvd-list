@@ -16,6 +16,7 @@ import {
   FormControlLabel,
   Checkbox,
   DialogActions,
+  Modal,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Edit, Delete } from "@mui/icons-material";
@@ -25,6 +26,7 @@ import axios from "axios";
 import MD5 from "crypto-js/md5";
 import StatusConfirmation from "./Confirmation-Dilogue";
 import CustomPagination from "./CustomPagination";
+import TableBottomActions from "./Bottom-table-actions";
 
 const IvrsDidListTable = ({ tableDidData, handleShow }) => {
   const [data, setData] = useState([]);
@@ -39,7 +41,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
   const [statusType, setStatusType] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [description, setDescription] = useState("");
-
+  const [selectedModuleNames, setSelectedModuleNames] = useState([]);
   const [openEditDrawer, setOpenEditDrawer] = useState(false);
   const [selectedDidData, setSelectedDidData] = useState(null);
   const [rows, setRows] = useState([]);
@@ -47,6 +49,8 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
   const [selectedModules, setSelectedModules] = useState([]);
   const [moduleOptions, setModuleOptions] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [openDelete, setOpenDelete] = useState(false);
 
   const apiurl = process.env.REACT_APP_API_URL; // Your API URL
   // For pagination
@@ -85,8 +89,13 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
 
   const handleOpen = (row) => {
     setEditingRow(row);
+    console.log(row, "Row");
     // Pre-populate selectedModules if row.module exists
     setSelectedModules(row.moduni !== null ? row?.moduni?.split(",") : []);
+    setSelectedModuleNames(
+      row.modnms ? row.modnms.split(",").map((n) => n.trim()) : []
+    );
+
     setOpen(true);
     axios
       .post(`${apiurl}/mtype_drp_did`, {
@@ -109,27 +118,15 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
 
   const handleModuleSave = async () => {
     if (editingRow) {
-      const modulesString = selectedModules?.join(", ");
-      const updatedRow = {
-        ...editingRow,
-        modnms: modulesString,
-      };
-
-      // Generate current date and time in the required formats
-      const now = new Date();
-      const dt = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
-      const tm = now.toTimeString().split(" ")[0]; // "HH:MM:SS"
-      const dttm = `${dt} ${tm}`; // "YYYY-MM-DD HH:MM:SS"
-
       try {
         const response = await axios.post(`${apiurl}/add_did_modules`, {
-          lml: "67a455659d796", // Session value
-          k: editingRow.ivrsduniq, // Unique key for the DID row
-          mod: selectedModules, // Selected modules (as an array)
-          diduni: editingRow.diduni, // DID unique identifier (assumed available)
-          accuni: editingRow.accuni, // Account unique identifier (assumed available)
-          ip: "", // Set the IP value if available (or leave empty)
-          funm: "add_did_modules", // Function name
+          lml: "67a455659d796",
+          k: editingRow.ivrsduniq,
+          mod: selectedModules,
+          diduni: editingRow.diduni,
+          accuni: editingRow.accuni,
+          ip: "",
+          funm: "add_did_modules",
         });
 
         if (response?.data?.resp?.error_code === "0") {
@@ -138,7 +135,27 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
             message: "Modules updated successfully.",
             severity: "success",
           });
-          handleShow();
+
+          setData((prevRows) => {
+            console.log(prevRows);
+            if (!prevRows || prevRows.length === 0) {
+              console.error("Table data is empty, skipping update.");
+              return prevRows;
+            }
+
+            const updatedRows = prevRows.map((row) =>
+              row.ivrsduniq === editingRow.ivrsduniq
+                ? {
+                    ...row,
+                    modnms: selectedModuleNames?.join(", "),
+                    moduni: selectedModules.join(","),
+                  }
+                : row
+            );
+
+            console.log("Updated Rows:", updatedRows);
+            return [...updatedRows]; // Force re-render
+          });
         } else {
           setSnackbar({
             open: true,
@@ -155,12 +172,11 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
         });
       }
 
-      // Reset the editing row and selected modules state
+      // Reset state
       setEditingRow(null);
       setSelectedModules([]);
+      setOpen(false);
     }
-    // Finally, close the dialog
-    setOpen(false);
   };
 
   const handleClose = () => {
@@ -257,12 +273,26 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
       });
     }
   };
+
   const handleToggle = (module) => {
-    setSelectedModules((prev) =>
-      prev.includes(module)
-        ? prev.filter((m) => m !== module)
-        : [...prev, module]
+    setSelectedModules((prevIds) =>
+      prevIds.includes(module.typuni)
+        ? prevIds.filter((id) => id !== module.typuni)
+        : [...prevIds, module.typuni]
     );
+
+    setSelectedModuleNames((prevNames) => {
+      console.log("Before toggle:", prevNames, "module:", module.typnm);
+      return prevNames.includes(module.typnm)
+        ? prevNames.filter((name) => name !== module.typnm)
+        : [...prevNames, module.typnm];
+    });
+  };
+  const handleOpenDelete = () => setOpenDelete(true);
+  const handleCloseDelete = () => setOpenDelete(false);
+  const handleConfirmDelete = () => {
+    console.log("Deletion confirmed for:", selectedRows);
+    handleCloseDelete();
   };
 
   const columns = [
@@ -270,14 +300,15 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
       field: "id",
       headerName: "S.No",
       type: "number",
-      width: 80,
+      flex: 1,
       align: "center",
     },
-    { field: "accontid", headerName: "Account Id", width: 100 },
+    { field: "accontid", headerName: "Account Id", flex: 2 },
     {
       field: "acca",
       headerName: "Account",
-      width: 160,
+      // width: 160,
+      flex: 2.8,
       renderCell: (params) => (
         <Typography
           sx={{
@@ -297,11 +328,12 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
         </Typography>
       ),
     },
-    { field: "rtnm", headerName: "Route", width: 200 },
+    { field: "rtnm", headerName: "Route", flex: 3 },
     {
       field: "mtype",
       headerName: "Module",
-      width: 250,
+      // width: 250,
+      flex: 3.5,
       align: "center",
 
       renderCell: (params) => {
@@ -321,27 +353,27 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
         );
       },
     },
-    { field: "tspnm", headerName: "TSP", width: 120 },
-    { field: "didnum", headerName: "DID Number", width: 150 },
-    { field: "ver", headerName: "Version", width: 100 },
-    { field: "didtyp", headerName: "Type", width: 150 },
+    { field: "tspnm", headerName: "TSP", flex: 2 },
+    { field: "didnum", headerName: "DID Number", flex: 2.5 },
+    { field: "ver", headerName: "Version", flex: 1.5 },
+    { field: "didtyp", headerName: "Type", flex: 2.5 },
     {
       field: "agtyp",
       headerName: "Agent Type",
-      width: 150,
+      flex: 3,
       renderCell: (params) => {
         if (params.value === 0) return "1st Number Agent";
         if (params.value === 1) return "2nd Number Agent";
         return "Unknown";
       },
     },
-    { field: "fdt", headerName: "From", width: 200 },
-    { field: "tdt", headerName: "To", width: 150 },
-    { field: "descr", headerName: "Description", width: 200 },
+    { field: "fdt", headerName: "From", flex: 3 },
+    { field: "tdt", headerName: "To", flex: 3 },
+    { field: "descr", headerName: "Description", flex: 2 },
     {
       field: "stat",
       headerName: "Status",
-      width: 250,
+      flex: 4,
       renderCell: (params) => (
         <>
           {params.row.stat === 1 ? (
@@ -388,7 +420,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
     {
       field: "actions",
       headerName: "Actions",
-      width: 150,
+      flex: 3,
       renderCell: (params) => (
         <>
           <IconButton
@@ -407,7 +439,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
       ),
     },
   ];
-
+  console.log(selectedRows, "selectcheck");
   return (
     <>
       {tableDidData?.length > 0 && (
@@ -415,29 +447,53 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
           <Grid container>
             <Grid item xs={12}>
               <Card>
-                <Box mt={2} m={2}>
+                <Box m={1}>
                   <Box display="flex" justifyContent="space-between" m={1}>
                     <Typography variant="h5" fontFamily="serif">
                       IVRS DID List
                     </Typography>
-                    <Button
-                      variant="contained"
-                      onClick={() => setOpenDrawer(true)}
-                    >
-                      Add +
-                    </Button>
+                    <Box>
+                      {selectedRows.length > 0 && (
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={handleOpenDelete}
+                          sx={{ mr: 2 }}
+                        >
+                          Delete
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="contained"
+                        onClick={() => setOpenDrawer(true)}
+                      >
+                        Add +
+                      </Button>
+                    </Box>
                   </Box>
                   <Box>
                     <DataGrid
                       rows={paginatedRows || []}
                       columns={columns}
                       disableSelectionOnClick={true}
+                      checkboxSelection={true}
+                      rowSelectionModel={selectedRows}
+                      // getRowId={(row) => row.uni}
+                      onRowSelectionModelChange={(newSelection) =>
+                        setSelectedRows(newSelection)
+                      }
                       hideFooter
                       getRowHeight={() => "auto"}
                       paginationMode="server"
+                      onRowClick={(params, event) => {
+                        if (!event.target.closest('[role="checkbox"]')) {
+                          event.defaultMuiPrevented = true;
+                        }
+                      }}
                       sx={{
                         height: "75vh",
-                        // width: "75vw",
+                        width: "100vw",
 
                         "& .MuiDataGrid-cell": {
                           display: "flex",
@@ -484,23 +540,62 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
 
                         "& .MuiDataGrid-cell": {
                           borderRight: "1px solid rgb(217, 211, 211)", // Add vertical lines in cells
-                          height: 150,
+
                           bgcolor: "#ffff",
                         },
                       }}
                     />
                   </Box>
 
-                  <CustomPagination
-                    currentPage={currentPage}
-                    totalRows={totalRows}
-                    startIndex={startIndex}
-                    pageSize={pageSize}
-                    handlePageSizeChange={handlePageSizeChange}
-                    handlePreviousPage={handlePreviousPage}
-                    handleNextPage={handleNextPage}
-                    totalPages={totalPages}
-                  />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      // padding: 2,
+                      backgroundColor: "#ffff",
+                      borderTop: "1px solid #ccc",
+                      // mt: 7,
+                    }}
+                  >
+                    <Box display={"flex"} gap={2}>
+                      <Box m={1}>
+                        <span>
+                          Selected Rows:{" "}
+                          <strong>
+                            {selectedRows?.length === data?.length
+                              ? "SelectedAll"
+                              : selectedRows?.length}
+                          </strong>
+                        </span>
+
+                        <span style={{ marginLeft: 15 }}>
+                          Total Rows: <strong>{data?.length}</strong>
+                        </span>
+                      </Box>
+                      <Box>
+                        {selectedRows.length > 0 && (
+                          <TableBottomActions
+                            selectedRows={selectedRows}
+                            setSelectedRows={setSelectedRows}
+                            // dropdownOptions={dropdownOptions}
+                            setData={setData}
+                          />
+                        )}
+                      </Box>
+                    </Box>
+
+                    <CustomPagination
+                      currentPage={currentPage}
+                      totalRows={totalRows}
+                      startIndex={startIndex}
+                      pageSize={pageSize}
+                      handlePageSizeChange={handlePageSizeChange}
+                      handlePreviousPage={handlePreviousPage}
+                      handleNextPage={handleNextPage}
+                      totalPages={totalPages}
+                    />
+                  </Box>
 
                   <Drawer
                     anchor="right"
@@ -555,7 +650,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                           control={
                             <Checkbox
                               checked={selectedModules?.includes(module.typuni)}
-                              onChange={() => handleToggle(module.typuni)}
+                              onChange={() => handleToggle(module)}
                             />
                           }
                           label={module.typnm}
@@ -598,6 +693,40 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
               {snackbar.message}
             </Alert>
           </Snackbar>
+          <Modal open={openDelete} onClose={handleCloseDelete}>
+            <Box
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                bgcolor: "white",
+                p: 3,
+                borderRadius: 2,
+                boxShadow: 24,
+              }}
+            >
+              <Typography>
+                Are you sure you want to delete the selected items?
+              </Typography>
+              <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
+                <Button
+                  onClick={handleConfirmDelete}
+                  variant="contained"
+                  color="error"
+                >
+                  Yes
+                </Button>
+                <Button
+                  onClick={handleCloseDelete}
+                  variant="outlined"
+                  color="primary"
+                >
+                  No
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
         </Box>
       )}
     </>
