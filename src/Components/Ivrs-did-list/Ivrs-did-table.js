@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Typography,
   Box,
@@ -26,10 +26,11 @@ import axios from "axios";
 import MD5 from "crypto-js/md5";
 import StatusConfirmation from "./Confirmation-Dilogue";
 import CustomPagination from "./CustomPagination";
-import TableBottomActions from "./Bottom-table-actions";
+import TableBottomActions from "./TableBottomActions";
+import { FilterContext } from "../context/FilterProvider";
 
-const IvrsDidListTable = ({ tableDidData, handleShow }) => {
-  const [data, setData] = useState([]);
+const IvrsDidListTable = ({ handleShow }) => {
+  const { data, setData } = useContext(FilterContext);
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -79,13 +80,6 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
     setPageSize(newSize);
     setCurrentPage(1); // Reset to first page on size change
   };
-
-  useEffect(() => {
-    if (tableDidData) {
-      setData(tableDidData);
-      setLoading(false);
-    }
-  }, [tableDidData]);
 
   const handleOpen = (row) => {
     setEditingRow(row);
@@ -137,9 +131,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
           });
 
           setData((prevRows) => {
-            console.log(prevRows);
             if (!prevRows || prevRows.length === 0) {
-              console.error("Table data is empty, skipping update.");
               return prevRows;
             }
 
@@ -152,8 +144,6 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                   }
                 : row
             );
-
-            console.log("Updated Rows:", updatedRows);
             return [...updatedRows]; // Force re-render
           });
         } else {
@@ -303,12 +293,12 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
       flex: 1,
       align: "center",
     },
-    { field: "accontid", headerName: "Account Id", flex: 2 },
+    { field: "accontid", headerName: "Account Id", flex: 2.5 },
     {
       field: "acca",
       headerName: "Account",
       // width: 160,
-      flex: 2.8,
+      flex: 3.5,
       renderCell: (params) => (
         <Typography
           sx={{
@@ -354,8 +344,8 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
       },
     },
     { field: "tspnm", headerName: "TSP", flex: 2 },
-    { field: "didnum", headerName: "DID Number", flex: 2.5 },
-    { field: "ver", headerName: "Version", flex: 1.5 },
+    { field: "didnum", headerName: "DID Number", flex: 3 },
+    { field: "ver", headerName: "Version", flex: 2 },
     { field: "didtyp", headerName: "Type", flex: 2.5 },
     {
       field: "agtyp",
@@ -367,9 +357,27 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
         return "Unknown";
       },
     },
-    { field: "fdt", headerName: "From", flex: 3 },
+    {
+      field: "fdt",
+      headerName: "From",
+      flex: 3,
+      // renderCell: (params) => {
+      //   return (
+      //     <>
+
+      //       <Box
+
+      //         variant="contained"
+      //         color="success"
+      //       >
+
+      //       </Box>
+      //     </>
+      //   );
+      // },
+    },
     { field: "tdt", headerName: "To", flex: 3 },
-    { field: "descr", headerName: "Description", flex: 2 },
+    { field: "descr", headerName: "Description", flex: 3.5 },
     {
       field: "stat",
       headerName: "Status",
@@ -442,12 +450,12 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
   console.log(selectedRows, "selectcheck");
   return (
     <>
-      {tableDidData?.length > 0 && (
+      {data?.length > 0 && (
         <Box>
           <Grid container>
             <Grid item xs={12}>
               <Card>
-                <Box m={1}>
+                <Box>
                   <Box display="flex" justifyContent="space-between" m={1}>
                     <Typography variant="h5" fontFamily="serif">
                       IVRS DID List
@@ -472,7 +480,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                       </Button>
                     </Box>
                   </Box>
-                  <Box>
+                  <Box sx={{ overflow: "auto" }}>
                     <DataGrid
                       rows={paginatedRows || []}
                       columns={columns}
@@ -492,7 +500,7 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                         }
                       }}
                       sx={{
-                        height: "75vh",
+                        height: "73vh",
                         width: "100vw",
 
                         "& .MuiDataGrid-cell": {
@@ -579,7 +587,6 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                             selectedRows={selectedRows}
                             setSelectedRows={setSelectedRows}
                             // dropdownOptions={dropdownOptions}
-                            setData={setData}
                           />
                         )}
                       </Box>
@@ -605,7 +612,6 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                     <Box sx={{ width: 500, p: 3 }}>
                       <IvrsDidAddForm
                         setOpenDrawer={setOpenDrawer}
-                        setData={setData}
                         handleShow={handleShow}
                       />
                     </Box>
@@ -619,7 +625,6 @@ const IvrsDidListTable = ({ tableDidData, handleShow }) => {
                       <IvrsDidEditForm
                         selectedDidData={selectedDidData}
                         setOpenEditDrawer={setOpenEditDrawer}
-                        setData={setData}
                         handleShow={handleShow}
                       />
                     </Box>

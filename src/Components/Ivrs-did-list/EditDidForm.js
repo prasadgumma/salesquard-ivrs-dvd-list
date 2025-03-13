@@ -21,7 +21,6 @@ dayjs.extend(customParseFormat);
 const IvrsDidEditForm = ({
   setOpenEditDrawer,
   selectedDidData,
-  setData,
   handleShow,
 }) => {
   // Initialize state with keys matching your API payload
@@ -94,7 +93,6 @@ const IvrsDidEditForm = ({
 
   // Map incoming names to the actual keys in formData
   const handleChange = (name, value) => {
-    name, value;
     let key = name;
     if (name === "account") key = "accuni";
     else if (name === "didType") key = "didtypuni";
@@ -105,6 +103,7 @@ const IvrsDidEditForm = ({
     else if (name === "description") key = "descr";
     else if (name === "agentType") key = "agtyp";
 
+    console.log("handleChange - Name:", name, "Value:", value);
     setFormData((prev) => ({
       ...prev,
       [key]: value,
@@ -115,7 +114,7 @@ const IvrsDidEditForm = ({
 
   const handleSubmit = async () => {
     try {
-      formData?.diduni;
+      console.log("DID unique:", formData?.diduni);
       const payload = {
         lml: "67a455659d796",
         k: MD5(formData.ivrsduniq).toString(),
@@ -129,60 +128,24 @@ const IvrsDidEditForm = ({
         agtyp: formData.agtyp,
       };
 
-      "Payload:", payload;
+      console.log("Payload:", payload);
       const response = await axios.post(
         `${apiurl}/ivrs_did_update_v1`,
         payload
       );
-      "Response:", response.data;
+      console.log("Response:", response.data);
 
-      // if (response.data.resp.status === "FAIL") {
-      //   console.error("API Error:", response.data.resp.message);
-      // } else {
-      //   setData((prevData) => [...prevData, payload]);
-      //   // Optionally, update your state or show a success message here
-      //   setOpenEditDrawer(false);
-      // }
       if (response.data.resp.status === "FAIL") {
         console.error("API Error:", response.data.resp.message);
       } else {
-        "Updating row with ID:", formData.ivrsduniq;
-        // ("Existing Table Data:", data);
-
-        // setData((prevData) => {
-        //   const newData = prevData.map((row) =>
-        //     row.ivrsduniq === formData.ivrsduniq ? { ...row, ...payload } : row
-        //   );
-        // });
-
-        // setData((prevData) => {
-        //   const newData = prevData.map((row) => {
-        //     if (row.ivrsduniq === formData.ivrsduniq) {
-        //       return {
-        //         ...row,
-        //         acca: formData.accuni,
-        //         didtypuni: formData.didtypuni,
-        //         tspid: formData.tspid,
-        //         rtuni: formData.rtuni,
-        //         descr: formData.descr,
-        //         agtyp: formData.agtyp,
-        //         fdt: formData.fdt,
-        //         tdt: formData.tdt,
-        //         diduni: formData.diduni,
-        //       };
-        //     }
-        //     return row;
-        //   });
-
-        //   ("Updated Data:", newData);
-        //   return newData; // ✅ Ensure the new state is returned
-        // });
+        console.log("Updating row with ID:", formData.ivrsduniq);
+        // Optionally, update your state or show a success message here
         handleShow();
         setOpenEditDrawer(false);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      // alert("Something went wrong. Please try again.");
+      // Optionally alert user on error
     }
   };
 

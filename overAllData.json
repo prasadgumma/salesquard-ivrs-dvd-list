@@ -1,0 +1,94 @@
+{
+  "changeValidity": [
+    {
+      "fromdate": "2025-03-01",
+      "todate": "2025-03-31",
+      "description": "Your description here.",
+      "id": "2d2f"
+    },
+    {
+      "id": "c6a3",
+      "changeValidity": [
+        {
+          "fromdate": "2025-03-12T18:30:00.000Z",
+          "todate": "2025-03-20T18:30:00.000Z",
+          "description": "Nothing"
+        }
+      ]
+    },
+    {
+      "id": "233d",
+      "changeValidity": [
+        {
+          "description": "Des"
+        }
+      ]
+    },
+    {
+      "id": "6682",
+      "changeValidity": [
+        {
+          "description": "Des"
+        }
+      ]
+    },
+    {
+      "id": "dff5",
+      "changeValidity": [
+        {
+          "description": "Des"
+        }
+      ]
+    },
+    {
+      "id": "6e16",
+      "changeValidity": [
+        {
+          "fromdate": "2025-03-05T18:30:00.000Z",
+          "todate": "2025-03-12T18:30:00.000Z",
+          "description": "Des"
+        }
+      ]
+    },
+    {
+      "id": "ee6c",
+      "changeValidity": [
+        {
+          "fromdate": "2025-03-05T18:30:00.000Z",
+          "todate": "2025-03-12T18:30:00.000Z",
+          "description": "Des"
+        }
+      ]
+    },
+    {
+      "id": "f904",
+      "changeValidity": [
+        {
+          "fromdate": "2025-03-05T18:30:00.000Z",
+          "todate": "2025-03-12T18:30:00.000Z",
+          "description": "Des"
+        }
+      ]
+    },
+    {
+      "id": "91d5",
+      "changeValidity": [
+        {
+          "fromdate": null,
+          "todate": null,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "294f",
+      "changeValidity": [
+        {
+          "fromdate": "2025-03-05T18:30:00.000Z",
+          "todate": "2025-03-12T18:30:00.000Z",
+          "description": "4545"
+        }
+      ]
+    }
+  ]
+}
