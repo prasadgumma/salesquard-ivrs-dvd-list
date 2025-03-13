@@ -140,7 +140,7 @@ import ChangeValidityModel from "./Change-validity";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import RouteChangeModel from "./Route-Change";
-import SuspendAndResumeConfirmation from "./All-Suspend-Resume";
+import SuspendAndResumeConfirmation from "./Suspend-Resume-Confirmation";
 
 const Component5 = ({ handleClose }) => (
   <Box>

@@ -20,13 +20,13 @@ import {
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Edit, Delete } from "@mui/icons-material";
-import IvrsDidAddForm from "./AddDidForm";
-import IvrsDidEditForm from "./EditDidForm";
+import IvrsDidAddForm from "./Add-Did-Form";
+import IvrsDidEditForm from "./Edit-Did-Form";
 import axios from "axios";
 import MD5 from "crypto-js/md5";
 import StatusConfirmation from "./Confirmation-Dilogue";
 import CustomPagination from "./CustomPagination";
-import TableBottomActions from "./TableBottomActions";
+import TableBottomActions from "./Table-Bottom-Actions";
 import { FilterContext } from "../context/FilterProvider";
 
 const IvrsDidListTable = ({ handleShow }) => {
