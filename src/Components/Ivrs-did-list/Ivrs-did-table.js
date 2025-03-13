@@ -17,6 +17,7 @@ import {
   Checkbox,
   DialogActions,
   Modal,
+  TextField,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Edit, Delete } from "@mui/icons-material";
@@ -28,9 +29,12 @@ import StatusConfirmation from "./Confirmation-Dilogue";
 import CustomPagination from "./CustomPagination";
 import TableBottomActions from "./Table-Bottom-Actions";
 import { FilterContext } from "../context/FilterProvider";
+import SearchIcon from "@mui/icons-material/Search";
+import MyFilterDrawer from "./My-Filter-Drawer";
 
 const IvrsDidListTable = ({ handleShow }) => {
   const { data, setData } = useContext(FilterContext);
+
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -52,7 +56,11 @@ const IvrsDidListTable = ({ handleShow }) => {
   const [editingRow, setEditingRow] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [openDelete, setOpenDelete] = useState(false);
-
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchText, setSearchText] = useState(""); // Search input
+  const [openFilterDrawer, setOpenFilterDrawer] = useState(false);
+  const toggleDrawer = () => setOpenFilterDrawer(!openFilterDrawer);
+  const [allFilterData, setAllFilterData] = useState(data);
   const apiurl = process.env.REACT_APP_API_URL; // Your API URL
   // For pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,7 +68,9 @@ const IvrsDidListTable = ({ handleShow }) => {
   const totalRows = data?.length;
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedRows =
-    pageSize === "All" ? data : data?.slice(startIndex, startIndex + pageSize);
+    pageSize === "All"
+      ? filteredData
+      : filteredData?.slice(startIndex, startIndex + pageSize);
   const totalPages = pageSize === "All" ? 1 : Math.ceil(totalRows / pageSize);
 
   const handleNextPage = () => {
@@ -285,19 +295,47 @@ const IvrsDidListTable = ({ handleShow }) => {
     handleCloseDelete();
   };
 
+  useEffect(() => {
+    setFilteredData(data);
+    setLoading(false);
+  }, [data]);
+
+  const handleSearch = (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+    setSearchText(searchTerm);
+
+    if (!searchTerm) {
+      setFilteredData(data); // Reset data when search is cleared
+      return;
+    }
+
+    const filteredResults = data.filter((row) =>
+      Object.values(row).some(
+        (value) =>
+          typeof value === "string" && value.toLowerCase().includes(searchTerm)
+      )
+    );
+
+    setFilteredData(filteredResults);
+    console.log(filteredData, "DataMy");
+  };
+  const resetData = () => {
+    setAllFilterData(data);
+  };
+
   const columns = [
     {
       field: "id",
       headerName: "S.No",
       type: "number",
-      flex: 1,
+      flex: 2,
       align: "center",
     },
     { field: "accontid", headerName: "Account Id", flex: 2.5 },
     {
       field: "acca",
       headerName: "Account",
-      // width: 160,
+
       flex: 3.5,
       renderCell: (params) => (
         <Typography
@@ -322,14 +360,13 @@ const IvrsDidListTable = ({ handleShow }) => {
     {
       field: "mtype",
       headerName: "Module",
-      // width: 250,
-      flex: 3.5,
+
+      flex: 5,
       align: "center",
 
       renderCell: (params) => {
         return (
-          <>
-            {/* The button to open the module selection dialog */}
+          <Box>
             <Button
               onClick={() => handleOpen(params.row)}
               variant="contained"
@@ -339,7 +376,7 @@ const IvrsDidListTable = ({ handleShow }) => {
             </Button>
 
             <p>{params.row.modnms}</p>
-          </>
+          </Box>
         );
       },
     },
@@ -361,20 +398,6 @@ const IvrsDidListTable = ({ handleShow }) => {
       field: "fdt",
       headerName: "From",
       flex: 3,
-      // renderCell: (params) => {
-      //   return (
-      //     <>
-
-      //       <Box
-
-      //         variant="contained"
-      //         color="success"
-      //       >
-
-      //       </Box>
-      //     </>
-      //   );
-      // },
     },
     { field: "tdt", headerName: "To", flex: 3 },
     { field: "descr", headerName: "Description", flex: 3.5 },
@@ -385,7 +408,7 @@ const IvrsDidListTable = ({ handleShow }) => {
       renderCell: (params) => (
         <>
           {params.row.stat === 1 ? (
-            <Box>
+            <Box textAlign={"center"}>
               <Typography color="red" fontWeight="bold">
                 Suspended
               </Typography>
@@ -408,7 +431,7 @@ const IvrsDidListTable = ({ handleShow }) => {
               </Button>
             </Box>
           ) : (
-            <Box>
+            <Box textAlign={"center"}>
               <Typography color="green" fontWeight="bold">
                 Active
               </Typography>
@@ -447,6 +470,7 @@ const IvrsDidListTable = ({ handleShow }) => {
       ),
     },
   ];
+
   console.log(selectedRows, "selectcheck");
   return (
     <>
@@ -456,21 +480,44 @@ const IvrsDidListTable = ({ handleShow }) => {
             <Grid item xs={12}>
               <Card>
                 <Box>
-                  <Box display="flex" justifyContent="space-between" m={1}>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    m={1}
+                  >
                     <Typography variant="h5" fontFamily="serif">
                       IVRS DID List
                     </Typography>
-                    <Box>
+
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        placeholder="Search..."
+                        value={searchText}
+                        onChange={handleSearch}
+                        InputProps={{
+                          endAdornment: (
+                            <IconButton>
+                              <SearchIcon />
+                            </IconButton>
+                          ),
+                        }}
+                      />
+
                       {selectedRows.length > 0 && (
                         <Button
                           variant="contained"
                           color="error"
                           onClick={handleOpenDelete}
-                          sx={{ mr: 2 }}
                         >
                           Delete
                         </Button>
                       )}
+                      <Button variant="contained" onClick={toggleDrawer}>
+                        My Filters
+                      </Button>
 
                       <Button
                         variant="contained"
@@ -480,6 +527,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                       </Button>
                     </Box>
                   </Box>
+
                   <Box sx={{ overflow: "auto" }}>
                     <DataGrid
                       rows={paginatedRows || []}
@@ -503,56 +551,73 @@ const IvrsDidListTable = ({ handleShow }) => {
                         height: "73vh",
                         width: "100vw",
 
+                        "& .MuiDataGrid-root": {
+                          fontFamily: "Arial, sans-serif",
+                          fontSize: "15px",
+                        },
+
                         "& .MuiDataGrid-cell": {
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
+                          fontSize: "15px",
+                          fontWeight: 500,
+                          color: "#333",
+                          borderRight: "1px solid rgb(217, 211, 211)", // Add vertical lines in cells
+                          bgcolor: "#ffffff",
+                        },
+
+                        "& .MuiDataGrid-columnHeader": {
+                          backgroundColor: "#0f0f0f",
+                          color: "white",
+                          fontWeight: "bold",
+                          fontSize: "16px",
+                          maxHeight: 80,
+                        },
+
+                        "& .MuiDataGrid-columnHeaderTitle": {
+                          color: "#ffff",
+                        },
+
+                        "& .MuiDataGrid-menuIconButton": {
+                          color: "white !important",
+                          opacity: 1,
+                        },
+
+                        "& .MuiDataGrid-columnMenuIcon": {
+                          color: "white !important",
+                        },
+
+                        "& .MuiDataGrid-columnHeaders .MuiSvgIcon-root": {
+                          color: "white !important",
+                        },
+
+                        "& .MuiDataGrid-sortIcon, & .MuiDataGrid-filterIcon": {
+                          color: "white !important",
+                        },
+
+                        "& .MuiDataGrid-row:nth-of-type(odd)": {
+                          backgroundColor: "#f9f9f9",
+                        },
+                        "& .MuiDataGrid-row:nth-of-type(even)": {
+                          backgroundColor: "#ffffff",
+                        },
+
+                        "& .MuiDataGrid-row:hover": {
+                          backgroundColor: "#e3f2fd",
                         },
 
                         "& .MuiDataGrid-columnHeaderCheckbox .MuiCheckbox-root":
                           {
                             color: "white",
                           },
-                        "& .MuiDataGrid-columnHeader": {
-                          backgroundColor: "#0f0f0f",
-                          color: "white",
-                          maxHeight: 70,
-                        },
-                        "& .MuiDataGrid-columnHeaderTitle": {
-                          color: "#ffff",
-                        },
-                        "& .MuiDataGrid-columnMenuIcon": {
-                          color: "#ffff",
-                        },
-                        "& .MuiDataGrid-menu": {
-                          backgroundColor: "#1976d2",
-                        },
-                        "& .MuiMenuItem-root": {
-                          color: "white",
-                        },
-                        "& .MuiDataGrid-menuItem-root:hover": {
-                          backgroundColor: "#1565c0",
-                        },
-                        "& .MuiDataGrid-sortIcon": {
-                          opacity: 1,
-                          color: "#ffff",
-                        },
-                        "& .MuiDataGrid-menuIconButton": {
-                          opacity: 1,
-                          color: "#ffff",
-                        },
-                        "& .MuiDataGrid-filterIcon": {
-                          opacity: 1,
-                          color: "white",
-                        },
 
-                        "& .MuiDataGrid-cell": {
-                          borderRight: "1px solid rgb(217, 211, 211)", // Add vertical lines in cells
-
-                          bgcolor: "#ffff",
+                        "& .MuiDataGrid-cell--withRenderer": {
+                          justifyContent: "center",
                         },
                       }}
                     />
+                    ;
                   </Box>
 
                   <Box
@@ -616,6 +681,37 @@ const IvrsDidListTable = ({ handleShow }) => {
                       />
                     </Box>
                   </Drawer>
+                  {/* Render your filtered data as needed */}
+                  <div>
+                    {allFilterData.map((item) => (
+                      <div key={item.id}>
+                        {item.member} - {item.age} - {item.city}
+                      </div>
+                    ))}
+                  </div>
+
+                  <MyFilterDrawer
+                    openDrawer={openFilterDrawer}
+                    toggleDrawer={toggleDrawer}
+                    fieldNames={[
+                      { value: "accontid", label: "Account Id" },
+                      { value: "acca", label: "Account" },
+                      { value: "rtnm", label: "Route" },
+                      { value: "mtype", label: "Module" },
+                      { value: "tspnm", label: "TSP" },
+                      { value: "didnum", label: "Did Number" },
+                      { value: "ver", label: "Version" },
+                      { value: "didtyp", label: "Type" },
+                      { value: "agtyp", label: "Agent Type" },
+                      { value: "fdt", label: "From" },
+                      { value: "tdt", label: "To" },
+                      { value: "descr", label: "Description" },
+                      { value: "stat", label: "Status" },
+                    ]}
+                    data={data}
+                    setAllFilterData={setAllFilterData}
+                    resetData={() => setAllFilterData(data)}
+                  />
                   <Drawer
                     anchor="right"
                     open={openEditDrawer}
