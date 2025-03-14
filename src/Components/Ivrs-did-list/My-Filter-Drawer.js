@@ -1,4 +1,4 @@
-// import React, { useState } from "react";
+// import React, { useState, useContext } from "react";
 // import {
 //   Box,
 //   Button,
@@ -13,15 +13,16 @@
 //   IconButton,
 // } from "@mui/material";
 // import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+// import { FilterContext } from "../context/FilterProvider";
 
 // const MyFilterDrawer = ({
 //   openDrawer,
 //   toggleDrawer,
 //   fieldNames,
-//   data,
-//   setAllFilterData,
 //   resetData,
 // }) => {
+//   // Use the FilterContext to get the data and setter
+//   const { data, setData } = useContext(FilterContext);
 //   const [didFilters, setDidFilters] = useState([
 //     { field: "", condition: "", value: "" },
 //   ]);
@@ -41,15 +42,24 @@
 //     setDidFilters(updatedFilters);
 //   };
 
-//   // Apply filters using only text based conditions and overall All/Any logic
+//   // Apply filters to the data using the selected logic
 //   const applyHandler = () => {
 //     let filteredData = [...data];
 //     if (filterLogic === "all") {
 //       // AND logic: every filter must match
 //       didFilters.forEach((filter) => {
-//         const { field, condition, value } = filter;
+//         let { field, condition, value } = filter;
+//         if (field === "accontid") {
+//           value = parseInt(value, 10);
+//         }
+//         if (field === "tspnm") {
+//           value = value.toUpperCase();
+//           console.log(value);
+//         }
+
 //         if (field && condition && value) {
 //           filteredData = filteredData.filter((item) => {
+//             // console.log(typeof field);
 //             switch (condition) {
 //               case "is":
 //                 return item[field] === value;
@@ -67,7 +77,6 @@
 //       });
 //     } else if (filterLogic === "any") {
 //       // OR logic: at least one filter must match
-//       console.log(filteredData, "Fdata");
 //       filteredData = filteredData.filter((item) => {
 //         return didFilters.some((filter) => {
 //           const { field, condition, value } = filter;
@@ -89,118 +98,8 @@
 //         });
 //       });
 //     }
-//     // if (customFilters.filterCondition === "all") {
-//     //   // AND logic
-//     //   memberFilters.forEach((filter) => {
-//     //     const { field, condition, value } = filter;
-//     //     if (field && condition && value) {
-//     //       filteredData = filteredData.filter((item) => {
-//     //         switch (field) {
-//     //           case "account":
-//     //           case "accountid":
-//     //           case "didNumber":
-//     //           case "version":
-//     //             const numVal = parseInt(item[field], 10);
-//     //             const filterNum = parseInt(value, 10);
-//     //             switch (condition) {
-//     //               case "=":
-//     //                 return numVal === filterNum;
-//     //               case "!=":
-//     //                 return numVal !== filterNum;
-//     //               case "<":
-//     //                 return numVal < filterNum;
-//     //               case ">":
-//     //                 return numVal > filterNum;
-//     //               case "<=":
-//     //                 return numVal <= filterNum;
-//     //               case ">=":
-//     //                 return numVal >= filterNum;
-//     //               default:
-//     //                 return true;
-//     //             }
-//     //           case "route":
-//     //           case "Module":
-//     //           case "Tsp":
-//     //           case "Type":
-//     //           case "Agentype":
-//     //           case "des":
-//     //           case "status":
-//     //             switch (condition) {
-//     //               case "is":
-//     //                 return item[field] === value;
-//     //               case "is_not":
-//     //                 return item[field] !== value;
-//     //               case "contains":
-//     //                 return item[field]?.toString().includes(value);
-//     //               case "does_not_contain":
-//     //                 return !item[field]?.toString().includes(value);
-//     //               default:
-//     //                 return true;
-//     //             }
-//     //           default:
-//     //             return true;
-//     //         }
-//     //       });
-//     //     }
-//     //   });
-//     // } else if (customFilters.filterCondition === "any") {
-//     //   // OR logic
-//     //   filteredData = filteredData.filter((item) => {
-//     //     return memberFilters.some((filter) => {
-//     //       const { field, condition, value } = filter;
-//     //       if (field && condition && value) {
-//     //         switch (field) {
-//     //           case "account":
-//     //           case "accountid":
-//     //           case "didNumber":
-//     //           case "version":
-//     //             const numVal = parseInt(item[field], 10);
-//     //             const filterNum = parseInt(value, 10);
-//     //             switch (condition) {
-//     //               case "=":
-//     //                 return numVal === filterNum;
-//     //               case "!=":
-//     //                 return numVal !== filterNum;
-//     //               case "<":
-//     //                 return numVal < filterNum;
-//     //               case ">":
-//     //                 return numVal > filterNum;
-//     //               case "<=":
-//     //                 return numVal <= filterNum;
-//     //               case ">=":
-//     //                 return numVal >= filterNum;
-//     //               default:
-//     //                 return true;
-//     //             }
-//     //           case "route":
-//     //           case "Module":
-//     //           case "Tsp":
-//     //           case "Type":
-//     //           case "Agentype":
-//     //           case "des":
-//     //           case "status":
-//     //             switch (condition) {
-//     //               case "is":
-//     //                 return item[field] === value;
-//     //               case "is_not":
-//     //                 return item[field] !== value;
-//     //               case "contains":
-//     //                 return item[field]?.toString().includes(value);
-//     //               case "does_not_contain":
-//     //                 return !item[field]?.toString().includes(value);
-//     //               default:
-//     //                 return true;
-//     //             }
-//     //           default:
-//     //             return true;
-//     //         }
-//     //       }
-//     //       return false;
-//     //     });
-//     //   });
-//     // }
-
-//     setAllFilterData(filteredData);
+//     // Update the data in the context and close the drawer
+//     setData(filteredData);
 //     toggleDrawer();
 //   };
 
@@ -209,7 +108,7 @@
 //     resetData();
 //     toggleDrawer();
 //   };
-//   console.log(data, "names");
+
 //   return (
 //     <Drawer anchor="right" open={openDrawer} onClose={toggleDrawer}>
 //       <Box p={2} width="600px">
@@ -351,7 +250,7 @@
 
 // export default MyFilterDrawer;
 
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useRef } from "react";
 import {
   Box,
   Button,
@@ -365,21 +264,34 @@ import {
   Drawer,
   IconButton,
 } from "@mui/material";
+
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { FilterContext } from "../context/FilterProvider";
+import CancelIcon from "@mui/icons-material/Cancel";
 
-const MyFilterDrawer = ({
-  openDrawer,
-  toggleDrawer,
-  fieldNames,
-  resetData,
-}) => {
-  // Use the FilterContext to get the data and setter
+const MyFilterDrawer = ({ openDrawer, toggleDrawer, resetData }) => {
   const { data, setData } = useContext(FilterContext);
   const [didFilters, setDidFilters] = useState([
     { field: "", condition: "", value: "" },
   ]);
   const [filterLogic, setFilterLogic] = useState("all");
+  const initialData = useRef(data);
+
+  // Declare fieldNames inside the component
+  const fieldNames = [
+    { value: "accontid", label: "Account Id" },
+    { value: "acca", label: "Account" },
+    { value: "rtnm", label: "Route" },
+    { value: "tspnm", label: "TSP" },
+    { value: "didnum", label: "Did Number" },
+    { value: "didtyp", label: "Type" },
+    { value: "agtyp", label: "Agent Type" },
+    { value: "fdt", label: "From" },
+    { value: "tdt", label: "To" },
+    { value: "descr", label: "Description" },
+    { value: "stat", label: "Status" },
+    // You can add more fields here if needed
+  ];
 
   const handleAddFilter = () => {
     setDidFilters([...didFilters, { field: "", condition: "", value: "" }]);
@@ -407,12 +319,13 @@ const MyFilterDrawer = ({
         }
         if (field === "tspnm") {
           value = value.toUpperCase();
-          console.log(value);
         }
-
+        if (field === "agtyp") {
+          value = parseInt(value, 10);
+        }
         if (field && condition && value) {
           filteredData = filteredData.filter((item) => {
-            // console.log(typeof field);
+            console.log(item);
             switch (condition) {
               case "is":
                 return item[field] === value;
@@ -432,7 +345,16 @@ const MyFilterDrawer = ({
       // OR logic: at least one filter must match
       filteredData = filteredData.filter((item) => {
         return didFilters.some((filter) => {
-          const { field, condition, value } = filter;
+          let { field, condition, value } = filter;
+          if (field === "accontid") {
+            value = parseInt(value, 10);
+          }
+          if (field === "tspnm") {
+            value = value.toUpperCase();
+          }
+          if (field === "agtyp") {
+            value = parseInt(value, 10);
+          }
           if (field && condition && value) {
             switch (condition) {
               case "is":
@@ -453,33 +375,38 @@ const MyFilterDrawer = ({
     }
     // Update the data in the context and close the drawer
     setData(filteredData);
-    toggleDrawer();
+    // toggleDrawer();
   };
 
-  const resetFilters = () => {
+  const resetDataInternal = () => {
     setDidFilters([{ field: "", condition: "", value: "" }]);
-    resetData();
+    setData(initialData.current);
     toggleDrawer();
   };
 
   return (
-    <Drawer anchor="right" open={openDrawer} onClose={toggleDrawer}>
+    <Drawer anchor="right" open={openDrawer}>
       <Box p={2} width="600px">
-        <Typography variant="h6" mb={2}>
-          My Filters
-        </Typography>
+        <Box display={"flex"} justifyContent={"space-between"}>
+          <Typography variant="h6" mb={2}>
+            My Filters
+          </Typography>
+          <IconButton onClick={() => toggleDrawer()}>
+            <CancelIcon />
+          </IconButton>
+        </Box>
         <Grid container spacing={3}>
           {/* Overall filter logic selection */}
           <Grid item xs={12} textAlign="center">
             <FormControl sx={{ width: "200px" }}>
-              <InputLabel>Filter Condition</InputLabel>
+              {/* <InputLabel>Filter Condition</InputLabel> */}
               <Select
-                label="Filter Condition"
+                // label="Filter Condition"
                 value={filterLogic}
                 onChange={(e) => setFilterLogic(e.target.value)}
               >
-                <MenuItem value="all">All (AND)</MenuItem>
-                <MenuItem value="any">Any (OR)</MenuItem>
+                <MenuItem value="all">All </MenuItem>
+                <MenuItem value="any">Any </MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -590,7 +517,7 @@ const MyFilterDrawer = ({
               variant="contained"
               color="primary"
               fullWidth
-              onClick={resetFilters}
+              onClick={resetDataInternal}
             >
               Reset Filters
             </Button>

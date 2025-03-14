@@ -32,9 +32,89 @@ import { FilterContext } from "../context/FilterProvider";
 import SearchIcon from "@mui/icons-material/Search";
 import MyFilterDrawer from "./My-Filter-Drawer";
 
+const modalStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  borderRadius: "8px",
+  boxShadow: 24,
+  p: 4,
+};
+
+const tableStyles = {
+  height: "73vh",
+  width: "100vw",
+
+  "& .MuiDataGrid-root": {
+    fontFamily: "Arial, sans-serif",
+    fontSize: "15px",
+  },
+
+  "& .MuiDataGrid-cell": {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: "15px",
+    fontWeight: 500,
+    color: "#333",
+    borderRight: "1px solid rgb(217, 211, 211)", // Add vertical lines in cells
+    bgcolor: "#ffffff",
+  },
+
+  "& .MuiDataGrid-columnHeader": {
+    backgroundColor: "#0f0f0f",
+    color: "white",
+    fontWeight: "bold",
+    fontSize: "16px",
+    maxHeight: 80,
+  },
+
+  "& .MuiDataGrid-columnHeaderTitle": {
+    color: "#ffff",
+  },
+
+  "& .MuiDataGrid-menuIconButton": {
+    color: "white !important",
+    opacity: 1,
+  },
+
+  "& .MuiDataGrid-columnMenuIcon": {
+    color: "white !important",
+  },
+
+  "& .MuiDataGrid-columnHeaders .MuiSvgIcon-root": {
+    color: "white !important",
+  },
+
+  "& .MuiDataGrid-sortIcon, & .MuiDataGrid-filterIcon": {
+    color: "white !important",
+  },
+
+  "& .MuiDataGrid-row:nth-of-type(odd)": {
+    backgroundColor: "#f9f9f9",
+  },
+  "& .MuiDataGrid-row:nth-of-type(even)": {
+    backgroundColor: "#ffffff",
+  },
+
+  "& .MuiDataGrid-row:hover": {
+    backgroundColor: "#e3f2fd",
+  },
+
+  "& .MuiDataGrid-columnHeaderCheckbox .MuiCheckbox-root": {
+    color: "white",
+  },
+
+  "& .MuiDataGrid-cell--withRenderer": {
+    justifyContent: "center",
+  },
+};
+
 const IvrsDidListTable = ({ handleShow }) => {
   const { data, setData } = useContext(FilterContext);
-
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -55,12 +135,15 @@ const IvrsDidListTable = ({ handleShow }) => {
   const [moduleOptions, setModuleOptions] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+
   const [openDelete, setOpenDelete] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [searchText, setSearchText] = useState(""); // Search input
   const [openFilterDrawer, setOpenFilterDrawer] = useState(false);
   const toggleDrawer = () => setOpenFilterDrawer(!openFilterDrawer);
   const [allFilterData, setAllFilterData] = useState(data);
+  const [openModal, setOpenModal] = useState(false);
   const apiurl = process.env.REACT_APP_API_URL; // Your API URL
   // For pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -187,7 +270,6 @@ const IvrsDidListTable = ({ handleShow }) => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  // Open dialog for either Suspend or Resume
   const handleOpenDialog = (row) => {
     setSelectedRow(row);
     setDescription(""); // Clear previous description
@@ -218,7 +300,6 @@ const IvrsDidListTable = ({ handleShow }) => {
     setOpenStatus(false);
   };
 
-  // Edit functionality using Axios
   const handleEditClick = async (row) => {
     try {
       const response = await axios.post(`${apiurl}/ivrs_did_elist`, {
@@ -238,7 +319,6 @@ const IvrsDidListTable = ({ handleShow }) => {
     }
   };
 
-  // Delete functionality using Axios
   const handleDeleteClick = async (row) => {
     try {
       const response = await axios.post(`${apiurl}/ivrs_did_del`, {
@@ -319,8 +399,39 @@ const IvrsDidListTable = ({ handleShow }) => {
     setFilteredData(filteredResults);
     console.log(filteredData, "DataMy");
   };
-  const resetData = () => {
-    setAllFilterData(data);
+
+  useEffect(() => {
+    // Update the "selectAll" checkbox if selectedRows length equals full data length.
+    setSelectAll(selectedRows.length === data.length && data.length > 0);
+  }, [selectedRows, data]);
+
+  const handleSelectAll = (event) => {
+    const checked = event.target.checked;
+    setSelectAll(checked);
+    if (checked) {
+      setOpenModal(true);
+    } else {
+      setSelectedRows([]);
+      setSelectAll(false);
+    }
+  };
+
+  const visibleSelected = paginatedRows
+    ? paginatedRows
+        .map((row) => row.id)
+        .filter((id) => selectedRows.includes(id))
+    : [];
+
+  const handleConfirmForAll = () => {
+    const allIds = data.map((row) => row.id);
+    setSelectedRows(allIds);
+    setSelectAll(true);
+    setOpenModal(false);
+  };
+
+  const handleCancelForAll = () => {
+    setOpenModal(false);
+    setSelectAll(false);
   };
 
   const columns = [
@@ -471,7 +582,6 @@ const IvrsDidListTable = ({ handleShow }) => {
     },
   ];
 
-  console.log(selectedRows, "selectcheck");
   return (
     <>
       {data?.length > 0 && (
@@ -532,90 +642,17 @@ const IvrsDidListTable = ({ handleShow }) => {
                     <DataGrid
                       rows={paginatedRows || []}
                       columns={columns}
-                      disableSelectionOnClick={true}
+                      disableRowSelectionOnClick={true}
                       checkboxSelection={true}
-                      rowSelectionModel={selectedRows}
-                      // getRowId={(row) => row.uni}
-                      onRowSelectionModelChange={(newSelection) =>
-                        setSelectedRows(newSelection)
-                      }
+                      rowSelectionModel={visibleSelected}
+                      onRowSelectionModelChange={(newSelection) => {
+                        setSelectAll(false);
+                        setSelectedRows(newSelection);
+                      }}
                       hideFooter
                       getRowHeight={() => "auto"}
                       paginationMode="server"
-                      onRowClick={(params, event) => {
-                        if (!event.target.closest('[role="checkbox"]')) {
-                          event.defaultMuiPrevented = true;
-                        }
-                      }}
-                      sx={{
-                        height: "73vh",
-                        width: "100vw",
-
-                        "& .MuiDataGrid-root": {
-                          fontFamily: "Arial, sans-serif",
-                          fontSize: "15px",
-                        },
-
-                        "& .MuiDataGrid-cell": {
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          fontSize: "15px",
-                          fontWeight: 500,
-                          color: "#333",
-                          borderRight: "1px solid rgb(217, 211, 211)", // Add vertical lines in cells
-                          bgcolor: "#ffffff",
-                        },
-
-                        "& .MuiDataGrid-columnHeader": {
-                          backgroundColor: "#0f0f0f",
-                          color: "white",
-                          fontWeight: "bold",
-                          fontSize: "16px",
-                          maxHeight: 80,
-                        },
-
-                        "& .MuiDataGrid-columnHeaderTitle": {
-                          color: "#ffff",
-                        },
-
-                        "& .MuiDataGrid-menuIconButton": {
-                          color: "white !important",
-                          opacity: 1,
-                        },
-
-                        "& .MuiDataGrid-columnMenuIcon": {
-                          color: "white !important",
-                        },
-
-                        "& .MuiDataGrid-columnHeaders .MuiSvgIcon-root": {
-                          color: "white !important",
-                        },
-
-                        "& .MuiDataGrid-sortIcon, & .MuiDataGrid-filterIcon": {
-                          color: "white !important",
-                        },
-
-                        "& .MuiDataGrid-row:nth-of-type(odd)": {
-                          backgroundColor: "#f9f9f9",
-                        },
-                        "& .MuiDataGrid-row:nth-of-type(even)": {
-                          backgroundColor: "#ffffff",
-                        },
-
-                        "& .MuiDataGrid-row:hover": {
-                          backgroundColor: "#e3f2fd",
-                        },
-
-                        "& .MuiDataGrid-columnHeaderCheckbox .MuiCheckbox-root":
-                          {
-                            color: "white",
-                          },
-
-                        "& .MuiDataGrid-cell--withRenderer": {
-                          justifyContent: "center",
-                        },
-                      }}
+                      sx={tableStyles}
                     />
                     ;
                   </Box>
@@ -632,7 +669,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                     }}
                   >
                     <Box display={"flex"} gap={2}>
-                      <Box m={1}>
+                      <Box mt={3}>
                         <span>
                           Selected Rows:{" "}
                           <strong>
@@ -648,11 +685,19 @@ const IvrsDidListTable = ({ handleShow }) => {
                       </Box>
                       <Box>
                         {selectedRows.length > 0 && (
-                          <TableBottomActions
-                            selectedRows={selectedRows}
-                            setSelectedRows={setSelectedRows}
-                            // dropdownOptions={dropdownOptions}
-                          />
+                          <Box display="flex" alignItems="center" mt={2}>
+                            <TableBottomActions
+                              selectedRows={selectedRows}
+                              setSelectedRows={setSelectedRows}
+                            />
+                            <Box ml={1} display="flex" alignItems="center">
+                              <Checkbox
+                                checked={selectAll}
+                                onChange={handleSelectAll}
+                              />
+                              FOR ALL
+                            </Box>
+                          </Box>
                         )}
                       </Box>
                     </Box>
@@ -681,7 +726,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                       />
                     </Box>
                   </Drawer>
-                  {/* Render your filtered data as needed */}
+
                   <div>
                     {allFilterData.map((item) => (
                       <div key={item.id}>
@@ -693,24 +738,6 @@ const IvrsDidListTable = ({ handleShow }) => {
                   <MyFilterDrawer
                     openDrawer={openFilterDrawer}
                     toggleDrawer={toggleDrawer}
-                    fieldNames={[
-                      { value: "accontid", label: "Account Id" },
-                      { value: "acca", label: "Account" },
-                      { value: "rtnm", label: "Route" },
-                      { value: "mtype", label: "Module" },
-                      { value: "tspnm", label: "TSP" },
-                      { value: "didnum", label: "Did Number" },
-                      { value: "ver", label: "Version" },
-                      { value: "didtyp", label: "Type" },
-                      { value: "agtyp", label: "Agent Type" },
-                      { value: "fdt", label: "From" },
-                      { value: "tdt", label: "To" },
-                      { value: "descr", label: "Description" },
-                      { value: "stat", label: "Status" },
-                    ]}
-                    data={data}
-                    setAllFilterData={setAllFilterData}
-                    resetData={() => setAllFilterData(data)}
                   />
                   <Drawer
                     anchor="right"
@@ -725,7 +752,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                       />
                     </Box>
                   </Drawer>
-                  {/* Confirmation Dialog for Suspend/Resume */}
+
                   <StatusConfirmation
                     open={openStatus}
                     onClose={() => setOpenStatus(false)}
@@ -824,6 +851,31 @@ const IvrsDidListTable = ({ handleShow }) => {
                   color="primary"
                 >
                   No
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
+
+          <Modal open={openModal} onClose={handleCancelForAll}>
+            <Box sx={modalStyle}>
+              <Typography variant="h6" component="h2" mb={2}>
+                Confirm Action
+              </Typography>
+              <Typography sx={{ mb: 3 }}>
+                Action will be applied to all items selected by the filter,
+                including items on other pages.
+              </Typography>
+              <Box display="flex" justifyContent="flex-end">
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleCancelForAll}
+                  sx={{ mr: 1 }}
+                >
+                  Cancel
+                </Button>
+                <Button variant="contained" onClick={handleConfirmForAll}>
+                  Confirm
                 </Button>
               </Box>
             </Box>
