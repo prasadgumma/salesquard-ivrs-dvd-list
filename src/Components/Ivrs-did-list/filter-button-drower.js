@@ -158,6 +158,7 @@ const FilterDrawer = () => {
             {/* TSP Filter */}
             <Grid item xs={12} sm={6} md={2.8}>
               <Autocomplete
+                size="small"
                 multiple
                 options={dropdownData.tsp} // Always show full list in the dropdown
                 getOptionLabel={(option) => option.nm || ""}
@@ -183,6 +184,7 @@ const FilterDrawer = () => {
             <Grid item xs={12} sm={6} md={2.8}>
               <Autocomplete
                 multiple
+                size="small"
                 options={dropdownData.account}
                 getOptionLabel={(option) => option.unm || ""}
                 value={dropdownData.account.filter((opt) =>
@@ -208,6 +210,7 @@ const FilterDrawer = () => {
             {/* Route Filter */}
             <Grid item xs={12} sm={6} md={2.7}>
               <Autocomplete
+                size="small"
                 multiple
                 options={dropdownData.route}
                 getOptionLabel={(option) => option.rtnm || ""}
@@ -271,6 +274,7 @@ const FilterDrawer = () => {
                 color="primary"
                 onClick={handleShow}
                 fullWidth
+                size="small"
                 sx={{ borderRadius: "8px", padding: "6px" }}
               >
                 Show

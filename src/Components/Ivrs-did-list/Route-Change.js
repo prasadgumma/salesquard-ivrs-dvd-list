@@ -103,7 +103,12 @@ const RouteChangeModel = ({ onClose }) => {
                   value={field.value}
                   onChange={(_event, newValue) => field.onChange(newValue)}
                   renderInput={(params) => (
-                    <TextField {...params} label="Select Option" fullWidth />
+                    <TextField
+                      {...params}
+                      label="Select Option"
+                      fullWidth
+                      size="small"
+                    />
                   )}
                 />
               )}

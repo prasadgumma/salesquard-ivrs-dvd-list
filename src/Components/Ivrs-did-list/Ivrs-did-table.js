@@ -662,56 +662,70 @@ const IvrsDidListTable = ({ handleShow }) => {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
-                      // padding: 2,
-                      backgroundColor: "#ffff",
+                      backgroundColor: "#fff",
                       borderTop: "1px solid #ccc",
-                      // mt: 7,
+                      p: 1, // common padding for the container
                     }}
                   >
-                    <Box display={"flex"} gap={2}>
-                      <Box mt={3}>
-                        <span>
-                          Selected Rows:{" "}
-                          <strong>
-                            {selectedRows?.length === data?.length
-                              ? "SelectedAll"
-                              : selectedRows?.length}
-                          </strong>
-                        </span>
+                    {/* Left Section */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 3, // consistent gap between elements
+                        flexWrap: "wrap", // allow wrapping on smaller screens
+                      }}
+                    >
+                      <Typography variant="body2">
+                        Selected Rows:{" "}
+                        <strong>
+                          {selectedRows?.length === data?.length
+                            ? "SelectedAll"
+                            : selectedRows?.length}
+                        </strong>
+                      </Typography>
+                      <Typography variant="body2">
+                        Total Rows: <strong>{data?.length}</strong>
+                      </Typography>
 
-                        <span style={{ marginLeft: 15 }}>
-                          Total Rows: <strong>{data?.length}</strong>
-                        </span>
-                      </Box>
-                      <Box>
-                        {selectedRows.length > 0 && (
-                          <Box display="flex" alignItems="center" mt={2}>
-                            <TableBottomActions
-                              selectedRows={selectedRows}
-                              setSelectedRows={setSelectedRows}
+                      {selectedRows.length > 0 && (
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <TableBottomActions
+                            selectedRows={selectedRows}
+                            setSelectedRows={setSelectedRows}
+                          />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            <Checkbox
+                              checked={selectAll}
+                              onChange={handleSelectAll}
                             />
-                            <Box ml={1} display="flex" alignItems="center">
-                              <Checkbox
-                                checked={selectAll}
-                                onChange={handleSelectAll}
-                              />
-                              FOR ALL
-                            </Box>
+                            <Typography variant="body2">FOR ALL</Typography>
                           </Box>
-                        )}
-                      </Box>
+                        </Box>
+                      )}
                     </Box>
 
-                    <CustomPagination
-                      currentPage={currentPage}
-                      totalRows={totalRows}
-                      startIndex={startIndex}
-                      pageSize={pageSize}
-                      handlePageSizeChange={handlePageSizeChange}
-                      handlePreviousPage={handlePreviousPage}
-                      handleNextPage={handleNextPage}
-                      totalPages={totalPages}
-                    />
+                    {/* Right Section */}
+                    <Box>
+                      <CustomPagination
+                        currentPage={currentPage}
+                        totalRows={totalRows}
+                        startIndex={startIndex}
+                        pageSize={pageSize}
+                        handlePageSizeChange={handlePageSizeChange}
+                        handlePreviousPage={handlePreviousPage}
+                        handleNextPage={handleNextPage}
+                        totalPages={totalPages}
+                      />
+                    </Box>
                   </Box>
 
                   <Drawer
@@ -738,6 +752,8 @@ const IvrsDidListTable = ({ handleShow }) => {
                   <MyFilterDrawer
                     openDrawer={openFilterDrawer}
                     toggleDrawer={toggleDrawer}
+                    data={data}
+                    setData={setData}
                   />
                   <Drawer
                     anchor="right"
