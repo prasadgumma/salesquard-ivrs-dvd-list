@@ -1,4 +1,3 @@
-// React Hook Form Valiations Added
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -9,12 +8,14 @@ import {
   Typography,
   Autocomplete,
   IconButton,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import CancelIcon from "@mui/icons-material/Cancel";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
+import CloseIcon from "@mui/icons-material/Close";
 
 const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
   const [dropdownData, setDropdownData] = useState({
@@ -25,9 +26,14 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
     did: [],
   });
 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
   const apiurl = process.env.REACT_APP_API_URL;
 
-  // Setup React Hook Form with default values and error tracking
   const {
     control,
     handleSubmit,
@@ -88,12 +94,11 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
     fetchDropdownData();
   }, [apiurl]);
 
-  // Watch for changes on DID Type and TSP so we can reset the DID field and fetch new DID data
+  // Watch for changes on DID Type and TSP to fetch new DID data
   const didTypeValue = watch("didType");
   const tspValue = watch("tsp");
 
   useEffect(() => {
-    // Reset the DID field when either DID Type or TSP changes
     setValue("did", []);
     const fetchDid = async () => {
       if (!didTypeValue || !tspValue) return;
@@ -120,7 +125,7 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
     fetchDid();
   }, [didTypeValue, tspValue, apiurl, setValue]);
 
-  // onSubmit function: constructs payload and sends API request
+  // onSubmit function that shows the Snackbar based on the API response
   const onSubmit = async (data) => {
     try {
       const payload = {
@@ -145,32 +150,53 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
 
       const response = await axios.post(`${apiurl}/ivrs_did_add_v2`, payload);
 
-      if (response.data.resp.error_code !== "0") {
-        console.error("API Error:", response.data.message);
-      } else {
+      if (response?.data?.resp?.error_code === "0") {
+        setSnackbar({
+          open: true,
+          message: "Did Added successfully.",
+          severity: "success",
+        });
         return true;
+      } else {
+        console.error("API Error:", response?.data?.message);
+        setSnackbar({
+          open: true,
+          message: response?.data?.message || "API Error occurred.",
+          severity: "error",
+        });
+        return false;
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Something went wrong. Please try again.");
+      setSnackbar({
+        open: true,
+        message: "Something went wrong. Please try again.",
+        severity: "error",
+      });
+      return false;
     }
   };
 
-  // Handler for the "Save" button (submit and close)
   const onSubmitClose = async (data) => {
     const success = await onSubmit(data);
     if (success) {
-      setOpenDrawer(false);
-      handleShow();
+      // Wait 1 second so that the Snackbar is visible before closing the drawer
+      setTimeout(() => {
+        setOpenDrawer(false);
+        handleShow();
+      }, 1000);
     }
   };
 
-  // Handler for the "Save & New" button (submit and reset)
   const onSubmitReset = async (data) => {
     const success = await onSubmit(data);
     if (success) {
       reset();
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -184,12 +210,12 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
           borderRadius: 2,
         }}
       >
-        <Box display={"flex"} justifyContent={"space-between"}>
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
+        <Box display="flex" justifyContent="space-between" mb={1.5}>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             IVRS DID
           </Typography>
           <IconButton onClick={() => setOpenDrawer(false)}>
-            <CancelIcon />
+            <CloseIcon />
           </IconButton>
         </Box>
 
@@ -383,7 +409,7 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
         </FormControl>
 
         {/* Date Pickers */}
-        <Box display={"flex"} sx={{ mb: 2 }}>
+        <Box display="flex" sx={{ mb: 2 }}>
           <Controller
             name="fromDate"
             control={control}
@@ -421,14 +447,18 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
           />
         </Box>
 
-        {/* Description Field */}
         <TextField
           fullWidth
           label="Description"
           variant="outlined"
           multiline
           rows={4}
-          sx={{ mb: 2 }}
+          sx={{
+            mb: 1,
+            "& .MuiInputBase-root textarea": {
+              resize: "both",
+            },
+          }}
           {...register("description")}
         />
 
@@ -456,6 +486,23 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
             Cancel
           </Button>
         </Box>
+
+        {/* Snackbar */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </LocalizationProvider>
   );

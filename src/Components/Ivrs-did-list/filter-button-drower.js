@@ -6,11 +6,27 @@ import {
   Grid,
   Autocomplete,
   CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import axios from "axios";
 import IvrsDidListTable from "./Ivrs-did-table";
 import { v4 as uuidv4 } from "uuid";
 import FilterProvider from "../context/FilterProvider";
+
+// Common styling for the TextField used in Autocomplete
+const textFieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "8px",
+    backgroundColor: "#fff",
+    // width: "250px", // Set the desired width
+    height: "48px", // Set the desired height
+    "& fieldset": { borderColor: "#ced4da" },
+    "&:hover fieldset": { borderColor: "#a1a1a1" },
+    "&.Mui-focused fieldset": { borderColor: "#1976d2" },
+  },
+  "& .MuiInputLabel-root": { color: "#1976d2" },
+};
 
 const FilterDrawer = () => {
   const [dropdownData, setDropdownData] = useState({
@@ -24,6 +40,11 @@ const FilterDrawer = () => {
     account: ["-1"],
     route: ["-1"],
     status: "-1",
+  });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
   });
 
   const [tableDidData, setTableDidData] = useState([]);
@@ -106,28 +127,27 @@ const FilterDrawer = () => {
             uuiv: `${index}-${uuidv4()}`,
           })) || []
         );
+        setSnackbar({
+          open: true,
+          message: "Data loaded successfully.",
+          severity: "success",
+        });
       } else {
         throw new Error(response.data.resp.message);
       }
     } catch (error) {
-      console.error("Error fetching filtered data:", error);
+      setSnackbar({
+        open: true,
+        message: error.message || "Error fetching data.",
+        severity: "error",
+      });
     } finally {
       setLoading(true);
     }
   };
 
-  // Common styling for the TextField used in Autocomplete
-  const textFieldSx = {
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "8px",
-      backgroundColor: "#fff",
-      // width: "250px", // Set the desired width
-      height: "48px", // Set the desired height
-      "& fieldset": { borderColor: "#ced4da" },
-      "&:hover fieldset": { borderColor: "#a1a1a1" },
-      "&.Mui-focused fieldset": { borderColor: "#1976d2" },
-    },
-    "& .MuiInputLabel-root": { color: "#1976d2" },
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   // Helper: If more than one value is selected, exclude "-1" (All) from the chips
@@ -156,7 +176,7 @@ const FilterDrawer = () => {
         >
           <Grid container alignItems="center" spacing={2} flexWrap="wrap">
             {/* TSP Filter */}
-            <Grid item xs={12} sm={6} md={2.8}>
+            <Grid item xs={12} sm={6} md={2.3}>
               <Autocomplete
                 size="small"
                 multiple
@@ -181,7 +201,7 @@ const FilterDrawer = () => {
             </Grid>
 
             {/* Account Filter */}
-            <Grid item xs={12} sm={6} md={2.8}>
+            <Grid item xs={12} sm={6} md={2.3}>
               <Autocomplete
                 multiple
                 size="small"
@@ -208,7 +228,7 @@ const FilterDrawer = () => {
             </Grid>
 
             {/* Route Filter */}
-            <Grid item xs={12} sm={6} md={2.7}>
+            <Grid item xs={12} sm={6} md={2.3}>
               <Autocomplete
                 size="small"
                 multiple
@@ -235,8 +255,9 @@ const FilterDrawer = () => {
             </Grid>
 
             {/* Status Filter */}
-            <Grid item xs={12} sm={6} md={2.7}>
+            <Grid item xs={12} sm={6} md={2.2}>
               <Autocomplete
+                size="small"
                 options={[
                   { label: "All", value: "-1" },
                   { label: "Active", value: "1" },
@@ -257,6 +278,7 @@ const FilterDrawer = () => {
                 }}
                 renderInput={(params) => (
                   <TextField
+                    size="small"
                     {...params}
                     label="Status"
                     variant="outlined"
@@ -282,6 +304,22 @@ const FilterDrawer = () => {
             </Grid>
           </Grid>
         </Box>
+        {/* Snackbar */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
       <Box mt={2}>
         {loading ? (
@@ -290,7 +328,11 @@ const FilterDrawer = () => {
             handleShow={handleShow}
           />
         ) : (
-          <CircularProgress sx={{ marginLeft: "40%", marginTop: "20%" }} />
+          <CircularProgress
+            variant="indeterminate"
+            size={"4rem"}
+            sx={{ marginLeft: "40%", marginTop: "20%" }}
+          />
         )}
       </Box>
       ;

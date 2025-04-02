@@ -15,14 +15,15 @@ import {
 } from "@mui/material";
 
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
-import CancelSharpIcon from "@mui/icons-material/CancelSharp";
+import CloseIcon from "@mui/icons-material/Close";
 import { FilterContext } from "../context/FilterProvider";
+import FilterListIcon from "@mui/icons-material/FilterList";
 
 const MyFilterDrawer = ({ openDrawer, toggleDrawer }) => {
   const { data, setData } = useContext(FilterContext);
   console.log(data, "FiData");
   const [didFilters, setDidFilters] = useState([
-    { field: "", condition: "is", value: "" },
+    { field: "", condition: "", value: "" },
   ]);
   const [filterLogic, setFilterLogic] = useState("all");
   const initialData = useRef(data);
@@ -40,8 +41,6 @@ const MyFilterDrawer = ({ openDrawer, toggleDrawer }) => {
     { value: "fdt", label: "From" },
     { value: "tdt", label: "To" },
     { value: "descr", label: "Description" },
-    // { value: "stat", label: "Status" },
-    // You can add more fields here if needed
   ];
 
   const handleAddFilter = () => {
@@ -137,117 +136,167 @@ const MyFilterDrawer = ({ openDrawer, toggleDrawer }) => {
 
   return (
     <Drawer anchor="right" open={openDrawer}>
-      <Box p={2} width="600px">
+      <Box p={2} width="520px">
         <Box display={"flex"} justifyContent={"space-between"}>
-          <Typography variant="h6" mb={2} fontWeight={"bold"}>
-            My Filters
-          </Typography>
+          <Box display={"flex"} gap={0.5}>
+            <FilterListIcon sx={{ mt: 0.5 }} />
+            <Typography variant="h6" mb={2} fontWeight={"bold"}>
+              My Filters
+            </Typography>
+          </Box>
           <IconButton onClick={() => toggleDrawer()}>
-            <CancelSharpIcon color="error" fontSize="medium" />
+            <CloseIcon fontSize="medium" />
           </IconButton>
         </Box>
         <Grid container spacing={3}>
           <Grid item xs={12} textAlign="center">
             <FormControl sx={{ width: "100px" }} size="small">
+              {/* <Select
+                value={filterLogic}
+                onChange={(e) => setFilterLogic(e.target.value)}
+              >
+                <MenuItem value="all" >
+                  All{" "}
+                </MenuItem>
+                <MenuItem value="any" >
+                  Any{" "}
+                </MenuItem>
+              </Select> */}
               <Select
                 value={filterLogic}
                 onChange={(e) => setFilterLogic(e.target.value)}
               >
-                <MenuItem value="all">All </MenuItem>
-                <MenuItem value="any">Any </MenuItem>
+                <MenuItem
+                  value="all"
+                  sx={{
+                    fontWeight: filterLogic === "all" ? "bold" : "normal",
+                    color: filterLogic === "all" ? "#6a69ff" : "inherit",
+                  }}
+                >
+                  All
+                </MenuItem>
+                <MenuItem
+                  value="any"
+                  sx={{
+                    fontWeight: filterLogic === "any" ? "550" : "normal",
+                    color: filterLogic === "any" ? "#6a69ff" : "inherit",
+                  }}
+                >
+                  Any
+                </MenuItem>
               </Select>
             </FormControl>
           </Grid>
+          <Grid item xs={12}>
+            <Divider />
+          </Grid>
 
-          {didFilters.map((filter, index) => (
-            <React.Fragment key={index}>
-              <Grid item xs={5}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Field</InputLabel>
-                  <Select
-                    label="Field"
-                    value={filter.field}
-                    onChange={(e) =>
-                      handleMemberFilterChange(index, "field", e.target.value)
-                    }
-                  >
-                    {fieldNames.map((field) => (
-                      <MenuItem key={field.value} value={field.value}>
-                        {field.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+          <Grid container spacing={1.8} ml={1.5} mt={1}>
+            {didFilters.map((filter, index) => (
+              <React.Fragment key={index}>
+                <Grid item xs={4.5}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Field</InputLabel>
+                    <Select
+                      label="Field"
+                      value={filter.field}
+                      onChange={(e) =>
+                        handleMemberFilterChange(index, "field", e.target.value)
+                      }
+                      renderValue={(selected) =>
+                        fieldNames.find((field) => field.value === selected)
+                          ?.label || ""
+                      }
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            "& .MuiMenuItem-root.Mui-selected": {
+                              fontWeight: "550", // Bold text for the selected item
+                              color: "#6a69ff", // Blue text color for the selected item
+                              fontFamily: "mulish,sans-serif",
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      {fieldNames.map((field) => (
+                        <MenuItem key={field.value} value={field.value}>
+                          {field.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-              <Grid item xs={3}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Condition</InputLabel>
-                  <Select
-                    label="Condition"
-                    value={filter.condition}
-                    onChange={(e) =>
-                      handleMemberFilterChange(
-                        index,
-                        "condition",
-                        e.target.value
-                      )
-                    }
-                  >
-                    <MenuItem value="is">Is</MenuItem>
-                    <MenuItem value="is_not">Is Not</MenuItem>
-                    <MenuItem value="contains">Contains</MenuItem>
-                    <MenuItem value="does_not_contain">
-                      Does Not Contain
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {/* Only show Value field when a field is selected */}
-              {filter.field && (
                 <Grid item xs={3}>
-                  <TextField
-                    fullWidth
-                    label="Value"
-                    size="small"
-                    value={filter.value}
-                    onChange={(e) =>
-                      handleMemberFilterChange(index, "value", e.target.value)
-                    }
-                  />
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Condition</InputLabel>
+                    <Select
+                      label="Condition"
+                      value={filter.condition}
+                      onChange={(e) =>
+                        handleMemberFilterChange(
+                          index,
+                          "condition",
+                          e.target.value
+                        )
+                      }
+                    >
+                      <MenuItem value="is">Is</MenuItem>
+                      <MenuItem value="is_not">Is Not</MenuItem>
+                      <MenuItem value="contains">Contains</MenuItem>
+                      <MenuItem value="does_not_contain">
+                        Does Not Contain
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
-              )}
 
-              <Grid item xs={1}>
-                <IconButton
-                  color="error"
-                  onClick={() => handleRemoveFilter(index)}
-                  // disabled={didFilters.length === 1}
-                >
-                  <RemoveCircleOutlineIcon />
-                </IconButton>
-              </Grid>
+                {/* Only show Value field when a field is selected */}
+                {filter.field && (
+                  <Grid item xs={3.5}>
+                    <TextField
+                      fullWidth
+                      label="Value"
+                      size="small"
+                      value={filter.value}
+                      onChange={(e) =>
+                        handleMemberFilterChange(index, "value", e.target.value)
+                      }
+                    />
+                  </Grid>
+                )}
 
-              {index < didFilters.length - 1 && (
-                <Grid item xs={12}>
-                  <Typography
-                    align="left"
-                    color="textSecondary"
-                    fontWeight={"bold"}
+                <Grid item xs={0.5} mr={2}>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleRemoveFilter(index)}
+                    // disabled={didFilters.length === 1}
                   >
-                    {filterLogic === "all" ? "AND" : "OR"}
-                  </Typography>
+                    <RemoveCircleOutlineIcon sx={{ color: "#6a69ff" }} />
+                  </IconButton>
                 </Grid>
-              )}
-            </React.Fragment>
-          ))}
+
+                {index < didFilters.length - 1 && (
+                  <Grid item xs={12}>
+                    <Typography
+                      align="left"
+                      color="textSecondary"
+                      fontWeight={"bold"}
+                    >
+                      {filterLogic === "all" ? "AND" : "OR"}
+                    </Typography>
+                  </Grid>
+                )}
+              </React.Fragment>
+            ))}
+          </Grid>
 
           {/* Add filter row */}
-          <Grid item xs={12}>
+          <Grid item xs={12} ml={0.5}>
             <Typography
               fontSize={15}
-              color="primary"
+              color="#6a69ff"
               onClick={handleAddFilter}
               sx={{ cursor: "pointer", display: "inline-block" }}
             >
@@ -255,13 +304,22 @@ const MyFilterDrawer = ({ openDrawer, toggleDrawer }) => {
             </Typography>
           </Grid>
 
-          <Grid container xs={12} gap={2} m={2} mt={4} justifyContent={"start"}>
+          <Grid
+            container
+            xs={12}
+            gap={2}
+            m={2}
+            mt={4}
+            ml={3.5}
+            justifyContent={"start"}
+          >
             <Grid item xs={2}>
               <Button
                 variant="contained"
-                color="primary"
+                // color="primary"
                 fullWidth
                 onClick={applyHandler}
+                sx={{ bgcolor: "#6a69ff" }}
               >
                 Apply
               </Button>

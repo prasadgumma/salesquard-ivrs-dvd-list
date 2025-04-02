@@ -1,75 +1,11 @@
-// import React from "react";
-// import { useForm, Controller } from "react-hook-form";
-// import { Box, Button, TextField, Autocomplete } from "@mui/material";
-
-// const options = [
-//   { label: "Option 1", value: "option1" },
-//   { label: "Option 2", value: "option2" },
-//   { label: "Option 3", value: "option3" },
-// ];
-
-// const RouteChangeModel = () => {
-//   const { control, register, handleSubmit } = useForm({
-//     defaultValues: {
-//       selectedOption: null,
-//       description: "",
-//     },
-//   });
-
-//   const onSubmit = (data) => {
-//     console.log("Form Data:", data);
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit(onSubmit)}>
-//       <Box sx={{ mb: 2 }}>
-//         <Controller
-//           name="selectedOption"
-//           control={control}
-//           render={({ field }) => (
-//             <Autocomplete
-//               options={options}
-//               getOptionLabel={(option) => option.label || ""}
-//               value={field.value}
-//               onChange={(_event, newValue) => field.onChange(newValue)}
-//               renderInput={(params) => (
-//                 <TextField {...params} label="Select Option" fullWidth />
-//               )}
-//             />
-//           )}
-//         />
-//       </Box>
-//       <TextField
-//         fullWidth
-//         label="Description"
-//         variant="outlined"
-//         multiline
-//         rows={4}
-//         sx={{ mb: 2 }}
-//         {...register("description")}
-//       />
-//       <Box display="flex" gap={2}>
-//         <Button type="submit" variant="contained" color="primary">
-//           Submit
-//         </Button>
-//         <Button type="reset" variant="outlined" color="secondary">
-//           Cancel
-//         </Button>
-//       </Box>
-//     </form>
-//   );
-// };
-
-// export default RouteChangeModel;
-
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Grid, Button, TextField, Autocomplete, Box } from "@mui/material";
 
 const options = [
-  { label: "Option 1", value: "option1" },
-  { label: "Option 2", value: "option2" },
-  { label: "Option 3", value: "option3" },
+  { label: "Cloud Tel - Transactional", value: "option1" },
+  { label: "Cloud Tel - Promotional", value: "option2" },
+  { label: "Cloud Tel - Optin", value: "option3" },
 ];
 
 const RouteChangeModel = ({ onClose }) => {
@@ -121,6 +57,12 @@ const RouteChangeModel = ({ onClose }) => {
               variant="outlined"
               multiline
               rows={4}
+              sx={{
+                mb: 1,
+                "& .MuiInputBase-root textarea": {
+                  resize: "both",
+                },
+              }}
               {...register("description")}
             />
           </Grid>
@@ -138,8 +80,8 @@ const RouteChangeModel = ({ onClose }) => {
             <Grid item>
               <Button
                 type="reset"
-                variant="outlined"
-                color="secondary"
+                variant="contained"
+                color="error"
                 onClick={handleClose}
               >
                 Cancel

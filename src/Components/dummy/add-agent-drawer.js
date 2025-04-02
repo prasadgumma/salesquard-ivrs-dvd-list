@@ -203,6 +203,7 @@ const AddIvrsdidDrawer = ({ openDrawer, setOpenDrawer, onRender }) => {
                   onChange={handleChange}
                   multiline
                   rows={4}
+                  inputProps={{ style: { resize: "both", fontSize: "25px" } }}
                 />
               </Grid>
               <Grid item xs={12}>

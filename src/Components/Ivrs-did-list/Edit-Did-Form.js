@@ -7,15 +7,17 @@ import {
   Typography,
   Autocomplete,
   IconButton,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import CancelIcon from "@mui/icons-material/Cancel";
 import axios from "axios";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import MD5 from "crypto-js/md5";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import CloseIcon from "@mui/icons-material/Close";
 dayjs.extend(customParseFormat);
 
 const IvrsDidEditForm = ({
@@ -44,6 +46,11 @@ const IvrsDidEditForm = ({
     tsp: [],
     did: [],
     route: [],
+  });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
   });
 
   const apiurl = process.env.REACT_APP_API_URL;
@@ -134,19 +141,39 @@ const IvrsDidEditForm = ({
         payload
       );
       console.log("Response:", response.data);
+      if (response?.data?.resp?.error_code === "0") {
+        setTimeout(() => {
+          handleShow();
+          setOpenEditDrawer(false);
+        }, 1000);
+        setSnackbar({
+          open: true,
+          message: "Did Added successfully.",
+          severity: "success",
+        });
 
-      if (response.data.resp.status === "FAIL") {
-        console.error("API Error:", response.data.resp.message);
+        return true;
       } else {
-        console.log("Updating row with ID:", formData.ivrsduniq);
-        // Optionally, update your state or show a success message here
-        handleShow();
-        setOpenEditDrawer(false);
+        console.error("API Error:", response?.data?.message);
+        setSnackbar({
+          open: true,
+          message: response?.data?.message || "API Error occurred.",
+          severity: "error",
+        });
+        return false;
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      // Optionally alert user on error
+      setSnackbar({
+        open: true,
+        message: "Something went wrong. Please try again.",
+        severity: "error",
+      });
+      return false;
     }
+  };
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -160,12 +187,12 @@ const IvrsDidEditForm = ({
           borderRadius: 2,
         }}
       >
-        <Box display="flex" justifyContent="space-between">
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
+        <Box display="flex" justifyContent="space-between" mb={1.5}>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             Edit IVRS DID
           </Typography>
           <IconButton onClick={() => setOpenEditDrawer(false)}>
-            <CancelIcon />
+            <CloseIcon />
           </IconButton>
         </Box>
 
@@ -342,7 +369,12 @@ const IvrsDidEditForm = ({
           variant="outlined"
           multiline
           rows={4}
-          sx={{ mb: 2 }}
+          sx={{
+            mb: 1,
+            "& .MuiInputBase-root textarea": {
+              resize: "both",
+            },
+          }}
         />
 
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -357,6 +389,23 @@ const IvrsDidEditForm = ({
             Cancel
           </Button>
         </Box>
+
+        {/* Snackbar */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </LocalizationProvider>
   );

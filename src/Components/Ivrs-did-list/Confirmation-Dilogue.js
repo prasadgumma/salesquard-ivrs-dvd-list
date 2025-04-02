@@ -42,6 +42,12 @@ const StatusConfirmation = ({
           required
           multiline
           rows={3}
+          sx={{
+            mb: 1,
+            "& .MuiInputBase-root textarea": {
+              resize: "both",
+            },
+          }}
           margin="dense"
         />
         <Typography sx={{ mt: 2, fontWeight: "bold", textAlign: "center" }}>

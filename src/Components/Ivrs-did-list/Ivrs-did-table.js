@@ -49,8 +49,8 @@ const tableStyles = {
   width: "100vw",
 
   "& .MuiDataGrid-root": {
-    fontFamily: "Arial, sans-serif",
-    fontSize: "15px",
+    fontFamily: "mulish, sans-serif",
+    fontSize: "16px",
   },
 
   "& .MuiDataGrid-cell": {

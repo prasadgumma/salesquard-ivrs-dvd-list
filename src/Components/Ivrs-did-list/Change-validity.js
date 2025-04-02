@@ -61,7 +61,7 @@ const ChangeValidityModel = ({ onClose }) => {
           )}
         />
       </Box>
-      <TextField
+      {/* <TextField
         fullWidth
         label="Description"
         variant="outlined"
@@ -69,8 +69,25 @@ const ChangeValidityModel = ({ onClose }) => {
         rows={4}
         sx={{ mb: 2 }}
         {...register("description")}
+      /> */}
+      <TextField
+        fullWidth
+        label="Description"
+        variant="outlined"
+        multiline
+        rows={4}
+        // sx={{ mb: 2 }}
+        sx={{
+          mb: 1,
+          "& .MuiInputBase-root textarea": {
+            resize: "both",
+          },
+        }}
+        {...register("description")}
+        inputProps={{ style: { resize: "both" } }} // allows both vertical and horizontal resizing
       />
-      <Box display="flex" gap={2}>
+
+      <Box display="flex" gap={2} justifyContent={"center"}>
         <Button
           type="submit"
           variant="contained"
@@ -81,8 +98,8 @@ const ChangeValidityModel = ({ onClose }) => {
         </Button>
         <Button
           type="reset"
-          variant="outlined"
-          color="secondary"
+          variant="contained"
+          color="error"
           onClose={onClose}
           onClick={HandleClose}
         >
