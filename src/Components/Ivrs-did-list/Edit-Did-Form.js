@@ -145,7 +145,7 @@ const IvrsDidEditForm = ({
         setTimeout(() => {
           handleShow();
           setOpenEditDrawer(false);
-        }, 1000);
+        }, 10);
         setSnackbar({
           open: true,
           message: "Did Added successfully.",

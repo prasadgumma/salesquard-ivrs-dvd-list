@@ -184,7 +184,7 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
       setTimeout(() => {
         setOpenDrawer(false);
         handleShow();
-      }, 1000);
+      }, 1);
     }
   };
 
@@ -192,6 +192,7 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
     const success = await onSubmit(data);
     if (success) {
       reset();
+      // handleShow();
     }
   };
 

@@ -46,7 +46,7 @@ const modalStyle = {
 
 const tableStyles = {
   height: "73vh",
-  width: "100vw",
+  width: "100%",
 
   "& .MuiDataGrid-root": {
     fontFamily: "mulish, sans-serif",
@@ -115,7 +115,6 @@ const tableStyles = {
 
 const IvrsDidListTable = ({ handleShow }) => {
   const { data, setData } = useContext(FilterContext);
-  const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -129,7 +128,6 @@ const IvrsDidListTable = ({ handleShow }) => {
   const [selectedModuleNames, setSelectedModuleNames] = useState([]);
   const [openEditDrawer, setOpenEditDrawer] = useState(false);
   const [selectedDidData, setSelectedDidData] = useState(null);
-  const [rows, setRows] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedModules, setSelectedModules] = useState([]);
   const [moduleOptions, setModuleOptions] = useState([]);
@@ -142,13 +140,12 @@ const IvrsDidListTable = ({ handleShow }) => {
   const [searchText, setSearchText] = useState(""); // Search input
   const [openFilterDrawer, setOpenFilterDrawer] = useState(false);
   const toggleDrawer = () => setOpenFilterDrawer(!openFilterDrawer);
-  const [allFilterData, setAllFilterData] = useState(data);
   const [openModal, setOpenModal] = useState(false);
   const apiurl = process.env.REACT_APP_API_URL; // Your API URL
   // For pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
-  const totalRows = data?.length;
+  const totalRows = filteredData?.length;
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedRows =
     pageSize === "All"
@@ -278,26 +275,73 @@ const IvrsDidListTable = ({ handleShow }) => {
   };
 
   const handleUpdate = async () => {
-    if (!selectedRow) return; // Ensure a row is selected
+    if (!selectedRow) return;
+    // Determine the new status.
+    // Assume: stat === 1 means currently Suspended; thus, resume will change status to "2".
+    // And if not Suspended, we suspend (change status to "1").
+    const newStatus = selectedRow.stat === 1 ? 2 : 1;
 
-    // Build the payload. The 'action' field helps the backend decide the operation.
     const payload = {
-      lml: "67a455659d796", // Replace with your actual session value
+      lml: "67a455659d796",
       accdid: `${selectedRow.compnm}-${selectedRow.unm}-${selectedRow.didnum}`,
-      k: selectedRow.ivrsduniq, // Unique identifier from the selected row
-      k1: selectedRow.stat === 1 ? "2" : "1",
-      des: description, // User-entered description
+      k: selectedRow.ivrsduniq,
+      k1: newStatus,
+      des: description,
     };
 
     try {
       const response = await axios.post(`${apiurl}/ivrs_did_suspend`, payload);
 
-      handleShow();
-      // Optionally, update your UI or notify the user of success
+      if (response?.data?.resp?.error_code === "0") {
+        // Update the context state, similar to your module update function.
+        setData((prevRows) => {
+          if (!prevRows || prevRows.length === 0) return prevRows;
+          const updatedRows = prevRows.map((row) =>
+            row.ivrsduniq === selectedRow.ivrsduniq
+              ? {
+                  ...row,
+                  stat: newStatus,
+                  sdes: description,
+                  sudt: new Date().toLocaleString(),
+                }
+              : row
+          );
+          return [...updatedRows];
+        });
+
+        // Optionally update selectedRow if needed elsewhere.
+        setSelectedRow((prev) => ({
+          ...prev,
+          stat: newStatus,
+        }));
+
+        setSnackbar({
+          open: true,
+          message:
+            newStatus === 1
+              ? "Module Suspended successfully."
+              : "Module Resumed successfully.",
+          severity: "success",
+        });
+
+        setOpenStatus(false);
+      } else {
+        setSnackbar({
+          open: true,
+          message:
+            response?.data?.resp?.message ||
+            "Failed to update status on the backend.",
+          severity: "error",
+        });
+      }
     } catch (error) {
       console.error("API call error:", error);
+      setSnackbar({
+        open: true,
+        message: "Failed to update status.",
+        severity: "error",
+      });
     }
-    setOpenStatus(false);
   };
 
   const handleEditClick = async (row) => {
@@ -377,7 +421,6 @@ const IvrsDidListTable = ({ handleShow }) => {
 
   useEffect(() => {
     setFilteredData(data);
-    setLoading(false);
   }, [data]);
 
   const handleSearch = (event) => {
@@ -440,14 +483,18 @@ const IvrsDidListTable = ({ handleShow }) => {
       headerName: "S.No",
       type: "number",
       flex: 2,
-      align: "center",
     },
-    { field: "accontid", headerName: "Account Id", flex: 2.5 },
+    {
+      field: "accontid",
+      headerAlign: "center",
+      headerName: "Account Id",
+      flex: 3.5,
+    },
     {
       field: "acca",
       headerName: "Account",
-
-      flex: 3.5,
+      headerAlign: "center",
+      flex: 3,
       renderCell: (params) => (
         <Typography
           sx={{
@@ -467,17 +514,16 @@ const IvrsDidListTable = ({ handleShow }) => {
         </Typography>
       ),
     },
-    { field: "rtnm", headerName: "Route", flex: 3 },
+    { field: "rtnm", headerAlign: "center", headerName: "Route", flex: 3 },
     {
       field: "mtype",
       headerName: "Module",
-
       flex: 5,
       align: "center",
-
+      headerAlign: "center",
       renderCell: (params) => {
         return (
-          <Box>
+          <Box mt={3}>
             <Button
               onClick={() => handleOpen(params.row)}
               variant="contained"
@@ -485,20 +531,25 @@ const IvrsDidListTable = ({ handleShow }) => {
             >
               +
             </Button>
-
             <p>{params.row.modnms}</p>
           </Box>
         );
       },
     },
-    { field: "tspnm", headerName: "TSP", flex: 2 },
-    { field: "didnum", headerName: "DID Number", flex: 3 },
-    { field: "ver", headerName: "Version", flex: 2 },
-    { field: "didtyp", headerName: "Type", flex: 2.5 },
+    { field: "tspnm", headerAlign: "center", headerName: "TSP", flex: 2 },
+    {
+      field: "didnum",
+      headerAlign: "center",
+      headerName: "DID Number",
+      flex: 3.7,
+    },
+    { field: "ver", headerAlign: "center", headerName: "Version", flex: 2.5 },
+    { field: "didtyp", headerAlign: "center", headerName: "Type", flex: 2.5 },
     {
       field: "agtyp",
       headerName: "Agent Type",
-      flex: 3,
+      headerAlign: "center",
+      flex: 3.5,
       renderCell: (params) => {
         if (params.value === 0) return "1st Number Agent";
         if (params.value === 1) return "2nd Number Agent";
@@ -508,12 +559,19 @@ const IvrsDidListTable = ({ handleShow }) => {
     {
       field: "fdt",
       headerName: "From",
-      flex: 3,
+      headerAlign: "center",
+      flex: 3.2,
     },
-    { field: "tdt", headerName: "To", flex: 3 },
-    { field: "descr", headerName: "Description", flex: 3.5 },
+    { field: "tdt", headerAlign: "center", headerName: "To", flex: 3.3 },
+    {
+      field: "descr",
+      headerAlign: "center",
+      headerName: "Description",
+      flex: 3.5,
+    },
     {
       field: "stat",
+      headerAlign: "center",
       headerName: "Status",
       flex: 4,
       renderCell: (params) => (
@@ -562,6 +620,7 @@ const IvrsDidListTable = ({ handleShow }) => {
     {
       field: "actions",
       headerName: "Actions",
+      headerAlign: "center",
       flex: 3,
       renderCell: (params) => (
         <>
@@ -581,7 +640,6 @@ const IvrsDidListTable = ({ handleShow }) => {
       ),
     },
   ];
-
   return (
     <>
       {data?.length > 0 && (
@@ -654,7 +712,6 @@ const IvrsDidListTable = ({ handleShow }) => {
                       paginationMode="server"
                       sx={tableStyles}
                     />
-                    ;
                   </Box>
 
                   <Box
@@ -664,7 +721,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                       alignItems: "center",
                       backgroundColor: "#fff",
                       borderTop: "1px solid #ccc",
-                      p: 1, // common padding for the container
+                      // common padding for the container
                     }}
                   >
                     {/* Left Section */}
@@ -740,14 +797,6 @@ const IvrsDidListTable = ({ handleShow }) => {
                       />
                     </Box>
                   </Drawer>
-
-                  <div>
-                    {allFilterData.map((item) => (
-                      <div key={item.id}>
-                        {item.member} - {item.age} - {item.city}
-                      </div>
-                    ))}
-                  </div>
 
                   <MyFilterDrawer
                     openDrawer={openFilterDrawer}
@@ -831,7 +880,7 @@ const IvrsDidListTable = ({ handleShow }) => {
             <Alert
               onClose={handleCloseSnackbar}
               severity={snackbar.severity}
-              variant="filled"
+              variant="standard"
               sx={{ width: "100%" }}
             >
               {snackbar.message}
@@ -857,14 +906,14 @@ const IvrsDidListTable = ({ handleShow }) => {
                 <Button
                   onClick={handleConfirmDelete}
                   variant="contained"
-                  color="error"
+                  color="primary"
                 >
                   Yes
                 </Button>
                 <Button
                   onClick={handleCloseDelete}
-                  variant="outlined"
-                  color="primary"
+                  variant="contained"
+                  color="error"
                 >
                   No
                 </Button>
