@@ -1,42 +1,27 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Select,
-  MenuItem,
-  Typography,
-  Modal,
-} from "@mui/material";
+// API Integration
+
+import React, { useContext, useState } from "react";
+import { Box, Select, MenuItem, Typography, Modal } from "@mui/material";
 import ChangeValidityModel from "./Change-validity";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import RouteChangeModel from "./Route-Change";
 import SuspendAndResumeConfirmation from "./Suspend-Resume-Confirmation";
+import { FilterContext } from "../context/FilterProvider";
 
-const Component5 = ({ handleClose }) => (
-  <Box>
-    <Typography>Dummy Action</Typography>
-    <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
-      <Button onClick={handleClose} variant="contained" color="primary">
-        Submit
-      </Button>
-      <Button onClick={handleClose} variant="outlined" color="secondary">
-        Cancel
-      </Button>
-    </Box>
-  </Box>
-);
-
-const TableBottomActions = ({ selectedRows }) => {
+const TableBottomActions = ({
+  selectedRows,
+  setSelectedRows,
+  setSelectedIvrsRows,
+  selectedIvrsRows,
+}) => {
+  const { data, setData } = useContext(FilterContext);
   const [selectedOption, setSelectedOption] = useState("");
   const [openSelection, setOpenSelection] = useState(false);
-  const [suspendResumeType, setSuspendResumeType] = useState(null);
 
+  // When an action is selected, open the modal
   const handleOpenSelection = (value) => {
     setSelectedOption(value);
-    setSuspendResumeType(
-      value === "value3" ? 0 : value === "value4" ? 1 : null
-    );
     setOpenSelection(true);
   };
 
@@ -45,11 +30,13 @@ const TableBottomActions = ({ selectedRows }) => {
     setOpenSelection(false);
   };
 
-  const handleSuspendResumeUpdate = (description) => {
-    console.log(`Action Updated with Description: ${description}`);
+  // Callback for status update
+  const handleStatusUpdate = (status, description) => {
+    console.log(`Action Updated: ${status}, Description: ${description}`);
+    // Additional actions after the status update can go here.
   };
 
-  // Function to render the component based on selected option
+  // Render the modal's inner component based on the selected action
   const renderComponent = () => {
     switch (selectedOption) {
       case "value1":
@@ -59,20 +46,31 @@ const TableBottomActions = ({ selectedRows }) => {
           </LocalizationProvider>
         );
       case "value2":
-        return <RouteChangeModel onClose={handleCloseSelection} />;
-      case "value3":
-      case "value4":
+        return (
+          <RouteChangeModel
+            onClose={handleCloseSelection}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+            selectedIvrsRows={selectedIvrsRows}
+            setSelectedIvrsRows={setSelectedIvrsRows}
+            data={data}
+            setData={setData}
+          />
+        );
+      case "updateStatus":
         return (
           <SuspendAndResumeConfirmation
             open={openSelection}
             onClose={handleCloseSelection}
-            type={suspendResumeType}
-            name="Selected User"
-            onUpdate={handleSuspendResumeUpdate}
+            onUpdate={handleStatusUpdate}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+            selectedIvrsRows={selectedIvrsRows}
+            setSelectedIvrsRows={setSelectedIvrsRows}
+            data={data}
+            setData={setData}
           />
         );
-      case "value5":
-        return <Component5 handleClose={handleCloseSelection} />;
       default:
         return <Typography>No Component</Typography>;
     }
@@ -98,9 +96,7 @@ const TableBottomActions = ({ selectedRows }) => {
           </MenuItem>
           <MenuItem value="value1">Change Validity</MenuItem>
           <MenuItem value="value2">Change Route</MenuItem>
-          <MenuItem value="value3">Suspend Action</MenuItem>
-          <MenuItem value="value4">Resume Action</MenuItem>
-          <MenuItem value="value5">Dummy</MenuItem>
+          <MenuItem value="updateStatus">Update Action Status</MenuItem>
         </Select>
       </Box>
 

@@ -133,8 +133,8 @@ const IvrsDidListTable = ({ handleShow }) => {
   const [moduleOptions, setModuleOptions] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedIvrsRows, setSelectedIvrsRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-
   const [openDelete, setOpenDelete] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [searchText, setSearchText] = useState(""); // Search input
@@ -414,9 +414,45 @@ const IvrsDidListTable = ({ handleShow }) => {
   };
   const handleOpenDelete = () => setOpenDelete(true);
   const handleCloseDelete = () => setOpenDelete(false);
-  const handleConfirmDelete = () => {
-    console.log("Deletion confirmed for:", selectedRows);
-    handleCloseDelete();
+
+  const handleConfirmAllDelete = async () => {
+    try {
+      const uniqValues = selectedIvrsRows;
+
+      const response = await axios.post(`${apiurl}/v1/ivrs_did_del_multiple`, {
+        lml: "67a455659d796", // actual session token
+        k: uniqValues,
+      });
+
+      if (response?.data?.resp?.error_code === "0") {
+        setData((prevData) =>
+          prevData.filter((item) => !uniqValues.includes(item.ivrsduniq))
+        );
+
+        setSnackbar({
+          open: true,
+          message: "Selected DIDs deleted successfully.",
+          severity: "success",
+        });
+
+        setSelectedIvrsRows([]); // reset selection
+      } else {
+        setSnackbar({
+          open: true,
+          message: "Failed to delete selected DIDs.",
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting DIDs:", error);
+      setSnackbar({
+        open: true,
+        message: "Error occurred during deletion.",
+        severity: "error",
+      });
+    }
+
+    handleCloseDelete(); // close the delete confirmation dialog
   };
 
   useEffect(() => {
@@ -467,7 +503,9 @@ const IvrsDidListTable = ({ handleShow }) => {
 
   const handleConfirmForAll = () => {
     const allIds = data.map((row) => row.id);
+    const allIvrsIds = data.map((row) => row.ivrsduniq);
     setSelectedRows(allIds);
+    setSelectedIvrsRows(allIvrsIds);
     setSelectAll(true);
     setOpenModal(false);
   };
@@ -514,7 +552,7 @@ const IvrsDidListTable = ({ handleShow }) => {
         </Typography>
       ),
     },
-    { field: "rtnm", headerAlign: "center", headerName: "Route", flex: 3 },
+    { field: "rtnm", headerAlign: "center", headerName: "Route", flex: 4 },
     {
       field: "mtype",
       headerName: "Module",
@@ -706,6 +744,10 @@ const IvrsDidListTable = ({ handleShow }) => {
                       onRowSelectionModelChange={(newSelection) => {
                         setSelectAll(false);
                         setSelectedRows(newSelection);
+                        const selectedIds = data
+                          .filter((row) => newSelection.includes(row.id))
+                          .map((row) => row.ivrsduniq);
+                        setSelectedIvrsRows(selectedIds);
                       }}
                       hideFooter
                       getRowHeight={() => "auto"}
@@ -752,6 +794,8 @@ const IvrsDidListTable = ({ handleShow }) => {
                           <TableBottomActions
                             selectedRows={selectedRows}
                             setSelectedRows={setSelectedRows}
+                            setSelectedIvrsRows={setSelectedIvrsRows}
+                            selectedIvrsRows={selectedIvrsRows}
                           />
                           <Box
                             sx={{
@@ -904,7 +948,7 @@ const IvrsDidListTable = ({ handleShow }) => {
               </Typography>
               <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
                 <Button
-                  onClick={handleConfirmDelete}
+                  onClick={handleConfirmAllDelete}
                   variant="contained"
                   color="primary"
                 >

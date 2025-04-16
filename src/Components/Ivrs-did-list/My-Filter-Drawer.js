@@ -333,6 +333,8 @@
 
 // export default MyFilterDrawer;
 
+// Main
+
 import React, { useState, useContext, useRef } from "react";
 import {
   Box,
@@ -355,6 +357,13 @@ import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { FilterContext } from "../context/FilterProvider";
+import {
+  DatePicker,
+  DateTimePicker,
+  LocalizationProvider,
+} from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const MyFilterDrawer = ({ openDrawer, toggleDrawer }) => {
   const { data, setData } = useContext(FilterContext);
@@ -604,8 +613,56 @@ const MyFilterDrawer = ({ openDrawer, toggleDrawer }) => {
                   </FormControl>
                 </Grid>
 
-                {filter.field && (
-                  <Grid item xs={3.5}>
+                {/* Render only one input field per filter.
+                    If the selected field is "tdt" or "fdt", show the appropriate Date/Time Picker.
+                    Otherwise, show a regular TextField. */}
+                <Grid item xs={3.5}>
+                  {filter.field === "tdt" || filter.field === "fdt" ? (
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      {filter.field === "tdt" ? (
+                        <DatePicker
+                          label="Value"
+                          inputFormat="YYYY-MM-DD"
+                          value={filter.value ? dayjs(filter.value) : null}
+                          onChange={(newValue) =>
+                            handleMemberFilterChange(
+                              index,
+                              "value",
+                              newValue?.format("YYYY-MM-DD")
+                            )
+                          }
+                          renderInput={(params) => (
+                            <TextField {...params} fullWidth size="small" />
+                          )}
+                        />
+                      ) : (
+                        <DateTimePicker
+                          label="Value"
+                          inputFormat="YYYY-MM-DD HH:mm:ss"
+                          ampm={false}
+                          views={[
+                            "year",
+                            "month",
+                            "day",
+                            "hours",
+                            "minutes",
+                            "seconds",
+                          ]}
+                          value={filter.value ? dayjs(filter.value) : null}
+                          onChange={(newValue) =>
+                            handleMemberFilterChange(
+                              index,
+                              "value",
+                              newValue?.format("YYYY-MM-DD HH:mm:ss")
+                            )
+                          }
+                          renderInput={(params) => (
+                            <TextField {...params} fullWidth size="small" />
+                          )}
+                        />
+                      )}
+                    </LocalizationProvider>
+                  ) : (
                     <TextField
                       fullWidth
                       label="Value"
@@ -615,8 +672,8 @@ const MyFilterDrawer = ({ openDrawer, toggleDrawer }) => {
                         handleMemberFilterChange(index, "value", e.target.value)
                       }
                     />
-                  </Grid>
-                )}
+                  )}
+                </Grid>
 
                 <Grid item xs={0.5} mr={2}>
                   <IconButton
