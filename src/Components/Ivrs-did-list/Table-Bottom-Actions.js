@@ -42,7 +42,15 @@ const TableBottomActions = ({
       case "value1":
         return (
           <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <ChangeValidityModel onClose={handleCloseSelection} />
+            <ChangeValidityModel
+              onClose={handleCloseSelection}
+              selectedRows={selectedRows}
+              setSelectedRows={setSelectedRows}
+              selectedIvrsRows={selectedIvrsRows}
+              setSelectedIvrsRows={setSelectedIvrsRows}
+              data={data}
+              setData={setData}
+            />
           </LocalizationProvider>
         );
       case "value2":

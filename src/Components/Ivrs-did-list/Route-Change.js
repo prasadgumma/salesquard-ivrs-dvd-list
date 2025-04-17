@@ -190,11 +190,9 @@ import axios from "axios";
 
 const RouteChangeModel = ({
   onClose,
-  selectedRows,
   setSelectedRows,
   selectedIvrsRows,
   setSelectedIvrsRows,
-  data,
   setData,
   onUpdate, // Optional callback to trigger after update
 }) => {

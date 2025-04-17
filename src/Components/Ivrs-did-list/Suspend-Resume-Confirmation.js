@@ -192,7 +192,6 @@ const SuspendAndResumeConfirmation = ({
   setSelectedRows,
   selectedIvrsRows,
   setSelectedIvrsRows,
-  data,
   setData,
 }) => {
   const [description, setDescription] = useState("");
