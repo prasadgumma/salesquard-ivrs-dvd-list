@@ -600,7 +600,7 @@ const IvrsDidListTable = ({ handleShow }) => {
       headerAlign: "center",
       flex: 3.2,
     },
-    { field: "tdt", headerAlign: "center", headerName: "To", flex: 3.3 },
+    { field: "tdt", headerAlign: "center", headerName: "To", flex: 3.5 },
     {
       field: "descr",
       headerAlign: "center",
@@ -611,7 +611,7 @@ const IvrsDidListTable = ({ handleShow }) => {
       field: "stat",
       headerAlign: "center",
       headerName: "Status",
-      flex: 4,
+      flex: 6,
       renderCell: (params) => (
         <>
           {params.row.stat === 1 ? (

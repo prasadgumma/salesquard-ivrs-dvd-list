@@ -6,10 +6,8 @@ import FilterProvider from "./Components/context/FilterProvider";
 const App = () => {
   return (
     <FilterProvider>
-      <div>
-        <FilterDrawer />
-        <IvrsDidListTable />
-      </div>
+      <FilterDrawer />
+      <IvrsDidListTable />
     </FilterProvider>
   );
 };
