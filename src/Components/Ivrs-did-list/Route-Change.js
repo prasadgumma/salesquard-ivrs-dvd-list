@@ -136,7 +136,18 @@ const RouteChangeModel = ({
   };
 
   return (
-    <Box sx={{ width: "80%", margin: "0 auto" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+        width: 350,
+        p: 3,
+        backgroundColor: "#f0f4f8",
+        borderRadius: 4,
+        boxShadow: 3,
+      }}
+    >
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2}>
           <Grid item xs={12}>

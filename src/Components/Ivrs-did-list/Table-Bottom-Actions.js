@@ -39,7 +39,7 @@ const TableBottomActions = ({
   // Render the modal's inner component based on the selected action
   const renderComponent = () => {
     switch (selectedOption) {
-      case "value1":
+      case "changeValidity":
         return (
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <ChangeValidityModel
@@ -53,7 +53,7 @@ const TableBottomActions = ({
             />
           </LocalizationProvider>
         );
-      case "value2":
+      case "changeRoute":
         return (
           <RouteChangeModel
             onClose={handleCloseSelection}
@@ -102,8 +102,8 @@ const TableBottomActions = ({
           <MenuItem value="" disabled>
             Select Actions
           </MenuItem>
-          <MenuItem value="value1">Change Validity</MenuItem>
-          <MenuItem value="value2">Change Route</MenuItem>
+          <MenuItem value="changeValidity">Change Validity</MenuItem>
+          <MenuItem value="changeRoute">Change Route</MenuItem>
           <MenuItem value="updateStatus">Update Action Status</MenuItem>
         </Select>
       </Box>

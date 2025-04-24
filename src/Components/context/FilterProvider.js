@@ -8,7 +8,7 @@ const FilterProvider = ({ children, tableDidData }) => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    if (tableDidData) {
+    if (tableDidData && tableDidData.length > 0) {
       setData(tableDidData);
     }
   }, [tableDidData]);

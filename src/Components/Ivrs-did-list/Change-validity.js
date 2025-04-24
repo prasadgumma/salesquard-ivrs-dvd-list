@@ -83,7 +83,6 @@ const ChangeValidityModel = ({
         // Clear selections
         setSelectedRows([]);
         setSelectedIvrsRows([]);
-
         // Reset form
         reset();
         onClose();
@@ -112,7 +111,16 @@ const ChangeValidityModel = ({
       component="form"
       onSubmit={handleSubmit(onSubmit)}
       noValidate
-      sx={{ display: "flex", flexDirection: "column", gap: 2, width: 400 }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+        width: 350,
+        p: 3,
+        backgroundColor: "#f0f4f8",
+        borderRadius: 4,
+        boxShadow: 3,
+      }}
     >
       <Controller
         name="validDate"
@@ -123,6 +131,35 @@ const ChangeValidityModel = ({
             value={field.value}
             onChange={field.onChange}
             renderInput={(params) => <TextField fullWidth {...params} />}
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                variant: "outlined",
+                sx: {
+                  "& .MuiInputLabel-root": {
+                    color: "#1976d2",
+                    fontWeight: 600,
+                  },
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "12px",
+                    backgroundColor: "#ffffff",
+                    "& fieldset": {
+                      borderColor: "#1976d2",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#1565c0",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#0d47a1",
+                    },
+                  },
+                  "& .MuiInputBase-input": {
+                    fontWeight: 500,
+                    fontSize: "0.95rem",
+                  },
+                },
+              },
+            }}
           />
         )}
       />
@@ -153,7 +190,7 @@ const ChangeValidityModel = ({
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={3000}
         onClose={handleCloseSnackbar}
         message={snackbar.message}
       />

@@ -10,6 +10,7 @@ import {
   IconButton,
   Snackbar,
   Alert,
+  Chip,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -221,7 +222,7 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
         </Box>
 
         {/* Account Dropdown */}
-        <FormControl fullWidth sx={{ mb: 2 }}>
+        <FormControl fullWidth sx={{ mb: 2 }} size="small">
           <Controller
             name="account"
             control={control}
@@ -233,6 +234,15 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
                 getOptionLabel={(option) => option.unm || ""}
                 onChange={(event, newValue) => field.onChange(newValue)}
                 value={field.value}
+                ListboxProps={{
+                  sx: {
+                    "& .MuiAutocomplete-option[aria-selected='true']": {
+                      fontWeight: 500,
+                      color: "#6a69ff",
+                      fontFamily: "mulish, sans-serif",
+                    },
+                  },
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -266,6 +276,15 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
                     (did) => did.mdtuniq === field.value
                   ) || null
                 }
+                ListboxProps={{
+                  sx: {
+                    "& .MuiAutocomplete-option[aria-selected='true']": {
+                      fontWeight: 500,
+                      color: "#6a69ff",
+                      fontFamily: "mulish, sans-serif",
+                    },
+                  },
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -298,6 +317,15 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
                   dropdownData.tsp.find((tsp) => tsp.uni === field.value) ||
                   null
                 }
+                ListboxProps={{
+                  sx: {
+                    "& .MuiAutocomplete-option[aria-selected='true']": {
+                      fontWeight: 500,
+                      color: "#6a69ff",
+                      fontFamily: "mulish, sans-serif",
+                    },
+                  },
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -313,6 +341,7 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
         </FormControl>
 
         {/* DID Multiple Selection */}
+
         <FormControl fullWidth sx={{ mb: 2 }}>
           <Controller
             name="did"
@@ -325,6 +354,15 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
                 getOptionLabel={(option) => option.dnum || ""}
                 onChange={(event, newValue) => field.onChange(newValue)}
                 value={field.value}
+                ListboxProps={{
+                  sx: {
+                    "& .MuiAutocomplete-option[aria-selected='true']": {
+                      fontWeight: 500,
+                      color: "#6a69ff", // Color of the selected item in dropdown
+                      fontFamily: "mulish, sans-serif",
+                    },
+                  },
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -334,6 +372,37 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
                     helperText={errors.did ? errors.did.message : ""}
                   />
                 )}
+                renderOption={(props, option, state) => (
+                  <li
+                    {...props}
+                    style={{
+                      backgroundColor: state.selected
+                        ? "#e0e0e0"
+                        : "transparent",
+                      color: state.selected ? "#6a69ff" : "#333", // This is what you wanted
+                      fontWeight: state.selected ? 500 : 400,
+                      fontFamily: "mulish, sans-serif",
+                    }}
+                  >
+                    {option.dnum}
+                  </li>
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((selectedValue, index) => (
+                    <Chip
+                      key={index}
+                      label={selectedValue.dnum}
+                      sx={{
+                        backgroundColor: "#6a69ff", // Customize chip background color
+                        color: "#fff", // Customize chip text color
+                        fontWeight: 500,
+                        fontFamily: "mulish, sans-serif",
+                        margin: 0.5, // Optional: spacing between chips
+                      }}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
               />
             )}
           />
@@ -356,6 +425,15 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
                     (route) => route.runi === field.value?.runi
                   ) || null
                 }
+                ListboxProps={{
+                  sx: {
+                    "& .MuiAutocomplete-option[aria-selected='true']": {
+                      fontWeight: 500,
+                      color: "#6a69ff",
+                      fontFamily: "mulish, sans-serif",
+                    },
+                  },
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -393,6 +471,15 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
                     { label: "2nd Number Agent", value: "2nd number agent" },
                   ].find((opt) => opt.value === field.value) || null
                 }
+                ListboxProps={{
+                  sx: {
+                    "& .MuiAutocomplete-option[aria-selected='true']": {
+                      fontWeight: 500,
+                      color: "#6a69ff",
+                      fontFamily: "mulish, sans-serif",
+                    },
+                  },
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
