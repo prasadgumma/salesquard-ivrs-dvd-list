@@ -248,7 +248,7 @@ const FilterDrawerMultiSelect = () => {
 
   return (
     <FilterProvider tableDidData={tableDidData}>
-      <Box mt={1} mr={2} textAlign="end">
+      <Box mt={0.5} mr={2} textAlign="end">
         <Box
           p={2}
           sx={{

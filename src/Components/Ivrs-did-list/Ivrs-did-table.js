@@ -31,6 +31,9 @@ import TableBottomActions from "./Table-Bottom-Actions";
 import { FilterContext } from "../context/FilterProvider";
 import SearchIcon from "@mui/icons-material/Search";
 import MyFilterDrawer from "./My-Filter-Drawer";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import AddSharpIcon from "@mui/icons-material/AddSharp";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const modalStyle = {
   position: "absolute",
@@ -45,8 +48,8 @@ const modalStyle = {
 };
 
 const tableStyles = {
-  height: "73vh",
-  width: "100%",
+  height: "76vh",
+  width: "100vw",
 
   "& .MuiDataGrid-root": {
     fontFamily: "mulish, sans-serif",
@@ -692,11 +695,22 @@ const IvrsDidListTable = ({ handleShow }) => {
                     alignItems="center"
                     m={1}
                   >
-                    <Typography variant="h5" fontFamily="serif">
+                    {/* Left Side - Title */}
+                    <Typography variant="h5" fontFamily="serif" color="#0d47a1">
                       IVRS DID List
                     </Typography>
 
-                    <Box display="flex" alignItems="center" gap={2}>
+                    {/* Right Side - With Background */}
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={2}
+                      p={1.5}
+                      bgcolor="#e3f2fd"
+                      borderRadius={2}
+                      boxShadow={1}
+                    >
+                      {/* Search Field */}
                       <TextField
                         variant="outlined"
                         size="small"
@@ -706,31 +720,64 @@ const IvrsDidListTable = ({ handleShow }) => {
                         InputProps={{
                           endAdornment: (
                             <IconButton>
-                              <SearchIcon />
+                              <SearchIcon color="primary" />
                             </IconButton>
                           ),
                         }}
+                        sx={{ backgroundColor: "#fff", borderRadius: 1 }}
                       />
 
+                      {/* Delete Icon */}
                       {selectedRows.length > 0 && (
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={handleOpenDelete}
-                        >
-                          Delete
-                        </Button>
+                        <IconButton onClick={handleOpenDelete}>
+                          <DeleteIcon color="error" sx={{ fontSize: 28 }} />
+                        </IconButton>
                       )}
-                      <Button variant="contained" onClick={toggleDrawer}>
-                        My Filters
-                      </Button>
 
-                      <Button
-                        variant="contained"
-                        onClick={() => setOpenDrawer(true)}
-                      >
-                        Add +
-                      </Button>
+                      {/* Filter Icon */}
+                      <IconButton onClick={toggleDrawer}>
+                        <FilterListIcon
+                          sx={{
+                            fontSize: 28,
+                            color: "#1976d2",
+                            transition: "0.3s",
+                            "&:hover": {
+                              color: "#0d47a1",
+                              transform: "scale(1.1)",
+                            },
+                          }}
+                        />
+                      </IconButton>
+
+                      {/* Add Icon + Label */}
+                      <Box display="flex" alignItems="center">
+                        <AddSharpIcon
+                          onClick={() => setOpenDrawer(true)}
+                          sx={{
+                            fontSize: 20,
+                            color: "#1976d2",
+                            cursor: "pointer",
+                            transition: "0.3s",
+                            "&:hover": {
+                              color: "#0d47a1",
+                              transform: "scale(1.1)",
+                            },
+                          }}
+                        />
+                        <Typography
+                          onClick={() => setOpenDrawer(true)}
+                          sx={{
+                            color: "#1976d2",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            "&:hover": {
+                              color: "#0d47a1",
+                            },
+                          }}
+                        >
+                          Add
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
 
@@ -773,6 +820,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                         alignItems: "center",
                         gap: 3, // consistent gap between elements
                         flexWrap: "wrap", // allow wrapping on smaller screens
+                        ml: 2,
                       }}
                     >
                       <Typography variant="body2">
