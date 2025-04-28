@@ -306,6 +306,9 @@ const IvrsDidEditForm = ({
               { label: "2nd Number Agent", value: 1 },
             ]}
             getOptionLabel={(option) => option.label}
+            isOptionEqualToValue={(option, value) =>
+              option.value === value.value
+            } // 🔥 IMPORTANT
             value={
               [
                 { label: "1st Number Agent", value: 0 },

@@ -461,7 +461,10 @@ const IvrsDidAddForm = ({ setOpenDrawer, handleShow }) => {
                   { label: "1st Number Agent", value: "1st number agent" },
                   { label: "2nd Number Agent", value: "2nd number agent" },
                 ]}
-                getOptionLabel={(option) => option.label}
+                getOptionLabel={(option) => option.label || ""}
+                isOptionEqualToValue={(option, value) =>
+                  option.value === value.value
+                } // ✅ Important
                 onChange={(event, newValue) =>
                   field.onChange(newValue ? newValue.value : "")
                 }

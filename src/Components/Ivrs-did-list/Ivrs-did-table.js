@@ -798,7 +798,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                       }}
                       hideFooter
                       getRowHeight={() => "auto"}
-                      paginationMode="server"
+                      // paginationMode="server"
                       sx={tableStyles}
                     />
                   </Box>
