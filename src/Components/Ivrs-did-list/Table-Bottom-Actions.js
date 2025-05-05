@@ -104,7 +104,7 @@ const TableBottomActions = ({
           </MenuItem>
           <MenuItem value="changeValidity">Change Validity</MenuItem>
           <MenuItem value="changeRoute">Change Route</MenuItem>
-          <MenuItem value="updateStatus">Update Action Status</MenuItem>
+          <MenuItem value="updateStatus">Change Status</MenuItem>
         </Select>
       </Box>
 

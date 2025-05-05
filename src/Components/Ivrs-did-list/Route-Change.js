@@ -6,9 +6,10 @@ import {
   TextField,
   Autocomplete,
   Box,
-  Snackbar,
+  // Snackbar,
 } from "@mui/material";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const RouteChangeModel = ({
   onClose,
@@ -26,11 +27,6 @@ const RouteChangeModel = ({
   });
 
   const [dropdownOptions, setDropdownOptions] = useState([]);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "",
-  });
 
   const apiurl = process.env.REACT_APP_API_URL;
 
@@ -47,11 +43,8 @@ const RouteChangeModel = ({
         }
       } catch (error) {
         console.error("Error fetching dropdown options:", error);
-        setSnackbar({
-          open: true,
-          message: "Error fetching dropdown options.",
-          severity: "error",
-        });
+
+        toast.error("Error fetching dropdown options:");
       }
     };
     fetchDropdownOptions();
@@ -73,12 +66,7 @@ const RouteChangeModel = ({
       console.log(response, "Res");
 
       if (response?.data?.resp?.error_code === "0") {
-        setSnackbar({
-          open: true,
-          message: "Route updated successfully.",
-          severity: "success",
-        });
-
+        toast.success("Route updated successfully");
         // Immediately update local state:
         setData((prevData) =>
           prevData.map((row) =>
@@ -110,24 +98,13 @@ const RouteChangeModel = ({
         // Close the modal.
         onClose();
       } else {
-        setSnackbar({
-          open: true,
-          message: "Failed to update route.",
-          severity: "error",
-        });
+        toast.error("Failed to update route.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      setSnackbar({
-        open: true,
-        message: "Error occurred during submission.",
-        severity: "error",
-      });
-    }
-  };
 
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
+      toast.error("Error occurred during submission.");
+    }
   };
 
   const handleClose = () => {
@@ -203,13 +180,6 @@ const RouteChangeModel = ({
           </Grid>
         </Grid>
       </form>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        message={snackbar.message}
-      />
     </Box>
   );
 };

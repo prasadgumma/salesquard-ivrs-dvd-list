@@ -322,8 +322,8 @@ const IvrsDidListTable = ({ handleShow }) => {
           open: true,
           message:
             newStatus === 1
-              ? "Module Suspended successfully."
-              : "Module Resumed successfully.",
+              ? "Module Resumed successfully."
+              : "Module Suspended successfully.",
           severity: "success",
         });
 

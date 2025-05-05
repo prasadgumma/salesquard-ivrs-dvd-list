@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Box, Button, Snackbar, TextField } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import axios from "axios";
 import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 /**
  * Props:
@@ -26,12 +27,6 @@ const ChangeValidityModel = ({
       validDate: null,
       description: "",
     },
-  });
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "",
   });
 
   const apiurl = process.env.REACT_APP_API_URL || "";
@@ -57,15 +52,10 @@ const ChangeValidityModel = ({
         `${apiurl}/v1/ivrsdid_valdty_update_multiple`,
         payload
       );
-
+      console.log(response, "Val Res");
       // Assuming error_code "0" means success
       if (response?.data?.resp?.error_code === "0") {
-        setSnackbar({
-          open: true,
-          message: "Validity updated successfully.",
-          severity: "success",
-        });
-
+        toast.success("Validity updated successfully.");
         // Update local context data immediately
         setData((prev) =>
           prev.map((row) =>
@@ -87,24 +77,14 @@ const ChangeValidityModel = ({
         reset();
         onClose();
       } else {
-        setSnackbar({
-          open: true,
-          message: "Failed to update validity.",
-          severity: "error",
-        });
+        toast.error("Failed to update validity.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      setSnackbar({
-        open: true,
-        message: "Submission error occurred.",
-        severity: "error",
-      });
+
+      toast.error("Submission error occurred.");
     }
   };
-
-  const handleCloseSnackbar = () =>
-    setSnackbar((prev) => ({ ...prev, open: false }));
 
   return (
     <Box
@@ -187,13 +167,6 @@ const ChangeValidityModel = ({
           Cancel
         </Button>
       </Box>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
-        message={snackbar.message}
-      />
     </Box>
   );
 };
