@@ -8,15 +8,15 @@ const App = () => {
   return (
     <FilterProvider>
       <Toaster
-        position="top-right"
+        position="top-center"
         toastOptions={{
-          duration: 4000,
+          duration: 3000,
           style: {
             background: "#ffff",
             color: "#333",
-            fontSize: "14px",
-            padding: "12px 16px",
-            borderRadius: "8px",
+            fontSize: "18px",
+            padding: "12px 12px",
+            borderRadius: "4px",
           },
           success: {
             iconTheme: {
@@ -27,7 +27,7 @@ const App = () => {
           error: {
             iconTheme: {
               primary: "#f44336",
-              secondary: "#fff",
+              secondary: "#ffff",
             },
           },
         }}

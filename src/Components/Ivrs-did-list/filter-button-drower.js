@@ -381,8 +381,6 @@ import {
   Grid,
   Autocomplete,
   CircularProgress,
-  Snackbar,
-  Alert,
   Chip,
   Tooltip,
 } from "@mui/material";
@@ -390,6 +388,7 @@ import axios from "axios";
 import IvrsDidListTable from "./Ivrs-did-table";
 import { v4 as uuidv4 } from "uuid";
 import FilterProvider from "../context/FilterProvider";
+import toast from "react-hot-toast";
 
 const autoCompleteSx = {
   "& .MuiInputLabel-root": { color: "#1976d2" },
@@ -422,11 +421,7 @@ const FilterDrawerMultiSelect = () => {
   });
 
   const [tableDidData, setTableDidData] = useState([]);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -507,27 +502,16 @@ const FilterDrawerMultiSelect = () => {
             uuiv: `${index}-${uuidv4()}`,
           }))
         );
-        setSnackbar({
-          open: true,
-          message: "Data loaded successfully.",
-          severity: "success",
-        });
+
+        toast.success("Data loaded successfully..");
       } else {
         throw new Error(response.data.resp.message);
       }
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: error.message || "Error fetching data.",
-        severity: "error",
-      });
+      toast.error(`${error.message} || "Error fetching data."`);
     } finally {
       setLoading(true);
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   const dropdownConfigs = [
@@ -678,22 +662,6 @@ const FilterDrawerMultiSelect = () => {
             </Grid>
           </Grid>
         </Box>
-
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={2000}
-          onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: "top", horizontal: "left" }}
-        >
-          <Alert
-            onClose={handleCloseSnackbar}
-            severity={snackbar.severity}
-            variant="filled"
-            sx={{ width: "100%" }}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
       </Box>
 
       <Box>

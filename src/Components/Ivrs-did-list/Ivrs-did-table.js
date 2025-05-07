@@ -7,8 +7,6 @@ import {
   Button,
   IconButton,
   Drawer,
-  Snackbar,
-  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -34,6 +32,7 @@ import MyFilterDrawer from "./My-Filter-Drawer";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import AddSharpIcon from "@mui/icons-material/AddSharp";
 import DeleteIcon from "@mui/icons-material/Delete";
+import toast from "react-hot-toast";
 
 const modalStyle = {
   position: "absolute",
@@ -118,11 +117,7 @@ const tableStyles = {
 
 const IvrsDidListTable = ({ handleShow }) => {
   const { data, setData } = useContext(FilterContext);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
   const [statusType, setStatusType] = useState(null);
@@ -217,11 +212,7 @@ const IvrsDidListTable = ({ handleShow }) => {
         });
 
         if (response?.data?.resp?.error_code === "0") {
-          setSnackbar({
-            open: true,
-            message: "Modules updated successfully.",
-            severity: "success",
-          });
+          toast.success("Modules updated successfully.");
 
           setData((prevRows) => {
             if (!prevRows || prevRows.length === 0) {
@@ -240,19 +231,12 @@ const IvrsDidListTable = ({ handleShow }) => {
             return [...updatedRows]; // Force re-render
           });
         } else {
-          setSnackbar({
-            open: true,
-            message: "Failed to update modules on the backend.",
-            severity: "error",
-          });
+          toast.error("Failed to update modules on the backend.");
         }
       } catch (error) {
         console.error("Error updating modules:", error);
-        setSnackbar({
-          open: true,
-          message: "Failed to update modules.",
-          severity: "error",
-        });
+
+        toast.error("Failed to update modules.");
       }
 
       // Reset state
@@ -266,10 +250,6 @@ const IvrsDidListTable = ({ handleShow }) => {
     setOpen(false);
   };
 
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
-  };
-
   const handleOpenDialog = (row) => {
     setSelectedRow(row);
     setDescription(""); // Clear previous description
@@ -279,9 +259,7 @@ const IvrsDidListTable = ({ handleShow }) => {
 
   const handleUpdate = async () => {
     if (!selectedRow) return;
-    // Determine the new status.
-    // Assume: stat === 1 means currently Suspended; thus, resume will change status to "2".
-    // And if not Suspended, we suspend (change status to "1").
+
     const newStatus = selectedRow.stat === 1 ? 2 : 1;
 
     const payload = {
@@ -317,33 +295,23 @@ const IvrsDidListTable = ({ handleShow }) => {
           ...prev,
           stat: newStatus,
         }));
-
-        setSnackbar({
-          open: true,
-          message:
-            newStatus === 1
-              ? "Module Resumed successfully."
-              : "Module Suspended successfully.",
-          severity: "success",
-        });
+        toast.success(
+          newStatus === 1
+            ? "Module Resumed successfully."
+            : "Module Suspended successfully."
+        );
 
         setOpenStatus(false);
       } else {
-        setSnackbar({
-          open: true,
-          message:
-            response?.data?.resp?.message ||
-            "Failed to update status on the backend.",
-          severity: "error",
-        });
+        toast.error(
+          response?.data?.resp?.message ||
+            "Failed to update status on the backend."
+        );
       }
     } catch (error) {
       console.error("API call error:", error);
-      setSnackbar({
-        open: true,
-        message: "Failed to update status.",
-        severity: "error",
-      });
+
+      toast.error("Failed to update modules.");
     }
   };
 
@@ -379,25 +347,15 @@ const IvrsDidListTable = ({ handleShow }) => {
         setData((prevData) =>
           prevData.filter((item) => item.ivrsduniq !== row.ivrsduniq)
         );
-        setSnackbar({
-          open: true,
-          message: "DID deleted successfully.",
-          severity: "success",
-        });
+
+        toast.success("DID deleted successfully.");
       } else {
-        setSnackbar({
-          open: true,
-          message: "Failed to delete DID.",
-          severity: "error",
-        });
+        toast.error("Failed to delete DID.");
       }
     } catch (error) {
       console.error("Error deleting DID:", error);
-      setSnackbar({
-        open: true,
-        message: "Error occurred during deletion.",
-        severity: "error",
-      });
+
+      toast.error("Error occurred during deletion.");
     }
   };
 
@@ -432,27 +390,15 @@ const IvrsDidListTable = ({ handleShow }) => {
           prevData.filter((item) => !uniqValues.includes(item.ivrsduniq))
         );
 
-        setSnackbar({
-          open: true,
-          message: "Selected DIDs deleted successfully.",
-          severity: "success",
-        });
-
+        toast.success("Selected DIDs deleted successfully.");
         setSelectedIvrsRows([]); // reset selection
       } else {
-        setSnackbar({
-          open: true,
-          message: "Failed to delete selected DIDs.",
-          severity: "error",
-        });
+        toast.error("Failed to delete selected DIDs.");
       }
     } catch (error) {
       console.error("Error deleting DIDs:", error);
-      setSnackbar({
-        open: true,
-        message: "Error occurred during deletion.",
-        severity: "error",
-      });
+
+      toast.error("Error occurred during deletion.");
     }
 
     handleCloseDelete(); // close the delete confirmation dialog
@@ -544,11 +490,7 @@ const IvrsDidListTable = ({ handleShow }) => {
             cursor: "pointer",
           }}
           onClick={() =>
-            setSnackbar({
-              open: true,
-              message: `You clicked on account: ${params.value}`,
-              severity: "success",
-            })
+            toast.success(`You clicked on account: ${params.value}`)
           }
         >
           {params.value}
@@ -706,9 +648,9 @@ const IvrsDidListTable = ({ handleShow }) => {
                       alignItems="center"
                       gap={2}
                       p={1.5}
-                      bgcolor="#e3f2fd"
-                      borderRadius={2}
-                      boxShadow={1}
+                      // bgcolor="#333"
+                      // borderRadius={2}
+                      // boxShadow={1}
                     >
                       {/* Search Field */}
                       <TextField
@@ -731,6 +673,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                       {selectedRows.length > 0 && (
                         <IconButton onClick={handleOpenDelete}>
                           <DeleteIcon color="error" sx={{ fontSize: 28 }} />
+                          <Typography color={"error"}>Delete</Typography>
                         </IconButton>
                       )}
 
@@ -738,46 +681,31 @@ const IvrsDidListTable = ({ handleShow }) => {
                       <IconButton onClick={toggleDrawer}>
                         <FilterListIcon
                           sx={{
-                            fontSize: 28,
-                            color: "#1976d2",
+                            fontSize: 34,
+                            color: "#6a69ff",
                             transition: "0.3s",
                             "&:hover": {
-                              color: "#0d47a1",
+                              color: "#6a69ff",
                               transform: "scale(1.1)",
                             },
                           }}
                         />
                       </IconButton>
-
-                      {/* Add Icon + Label */}
-                      <Box display="flex" alignItems="center">
-                        <AddSharpIcon
-                          onClick={() => setOpenDrawer(true)}
-                          sx={{
-                            fontSize: 20,
-                            color: "#1976d2",
-                            cursor: "pointer",
-                            transition: "0.3s",
-                            "&:hover": {
-                              color: "#0d47a1",
-                              transform: "scale(1.1)",
-                            },
-                          }}
-                        />
-                        <Typography
-                          onClick={() => setOpenDrawer(true)}
-                          sx={{
-                            color: "#1976d2",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            "&:hover": {
-                              color: "#0d47a1",
-                            },
-                          }}
-                        >
-                          Add
-                        </Typography>
-                      </Box>
+                      <Button
+                        onClick={() => setOpenDrawer(true)}
+                        sx={{
+                          bgcolor: "#6a69ff",
+                          color: "#ffff",
+                          "&:hover": {
+                            color: "#ffff",
+                            bgcolor: "#6a69ff",
+                            transform: "scale(1.1)",
+                          },
+                        }}
+                      >
+                        <AddSharpIcon sx={{ fontSize: 16 }} />
+                        <Typography>Add</Typography>
+                      </Button>
                     </Box>
                   </Box>
 
@@ -963,21 +891,7 @@ const IvrsDidListTable = ({ handleShow }) => {
               </Card>
             </Grid>
           </Grid>
-          <Snackbar
-            open={snackbar.open}
-            autoHideDuration={3000}
-            onClose={handleCloseSnackbar}
-            anchorOrigin={{ vertical: "top", horizontal: "left" }}
-          >
-            <Alert
-              onClose={handleCloseSnackbar}
-              severity={snackbar.severity}
-              variant="standard"
-              sx={{ width: "100%" }}
-            >
-              {snackbar.message}
-            </Alert>
-          </Snackbar>
+
           <Modal open={openDelete} onClose={handleCloseDelete}>
             <Box
               sx={{
