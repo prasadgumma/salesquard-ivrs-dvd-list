@@ -55,15 +55,31 @@ const TableBottomActions = ({
         );
       case "changeRoute":
         return (
-          <RouteChangeModel
-            onClose={handleCloseSelection}
-            selectedRows={selectedRows}
-            setSelectedRows={setSelectedRows}
-            selectedIvrsRows={selectedIvrsRows}
-            setSelectedIvrsRows={setSelectedIvrsRows}
-            data={data}
-            setData={setData}
-          />
+          <Modal open={openSelection} onClose={handleCloseSelection}>
+            <Box
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                bgcolor: "white",
+                p: 3,
+                borderRadius: 2,
+                boxShadow: 24,
+                width: 400,
+              }}
+            >
+              <RouteChangeModel
+                onClose={handleCloseSelection}
+                selectedRows={selectedRows}
+                setSelectedRows={setSelectedRows}
+                selectedIvrsRows={selectedIvrsRows}
+                setSelectedIvrsRows={setSelectedIvrsRows}
+                data={data}
+                setData={setData}
+              />
+            </Box>
+          </Modal>
         );
       case "updateStatus":
         return (

@@ -169,7 +169,7 @@ const IvrsDidListTable = ({ handleShow }) => {
     setCurrentPage(1); // Reset to first page on size change
   };
 
-  const handleOpen = (row) => {
+  const handleOpenModules = (row) => {
     setEditingRow(row);
     console.log(row, "Row");
     // Pre-populate selectedModules if row.module exists
@@ -246,18 +246,18 @@ const IvrsDidListTable = ({ handleShow }) => {
     }
   };
 
-  const handleClose = () => {
+  const handleCloseModules = () => {
     setOpen(false);
   };
 
-  const handleOpenDialog = (row) => {
+  const handleOpenStatusDialog = (row) => {
     setSelectedRow(row);
     setDescription(""); // Clear previous description
     setStatusType(row.stat); // Assume stat === 1 means "suspended", so dialog shows "Resume"
     setOpenStatus(true);
   };
 
-  const handleUpdate = async () => {
+  const handleStatusUpdate = async () => {
     if (!selectedRow) return;
 
     const newStatus = selectedRow.stat === 1 ? 2 : 1;
@@ -358,6 +358,8 @@ const IvrsDidListTable = ({ handleShow }) => {
       toast.error("Error occurred during deletion.");
     }
   };
+  const handleOpenDelete = () => setOpenDelete(true);
+  const handleCloseDelete = () => setOpenDelete(false);
 
   const handleToggle = (module) => {
     setSelectedModules((prevIds) =>
@@ -367,14 +369,12 @@ const IvrsDidListTable = ({ handleShow }) => {
     );
 
     setSelectedModuleNames((prevNames) => {
-      console.log("Before toggle:", prevNames, "module:", module.typnm);
+      // console.log("Before toggle:", prevNames, "module:", module.typnm);
       return prevNames.includes(module.typnm)
         ? prevNames.filter((name) => name !== module.typnm)
         : [...prevNames, module.typnm];
     });
   };
-  const handleOpenDelete = () => setOpenDelete(true);
-  const handleCloseDelete = () => setOpenDelete(false);
 
   const handleConfirmAllDelete = async () => {
     try {
@@ -508,7 +508,7 @@ const IvrsDidListTable = ({ handleShow }) => {
         return (
           <Box mt={3}>
             <Button
-              onClick={() => handleOpen(params.row)}
+              onClick={() => handleOpenModules(params.row)}
               variant="contained"
               color="success"
             >
@@ -524,7 +524,7 @@ const IvrsDidListTable = ({ handleShow }) => {
       field: "didnum",
       headerAlign: "center",
       headerName: "DID Number",
-      flex: 3.7,
+      flex: 4,
     },
     { field: "ver", headerAlign: "center", headerName: "Version", flex: 2.5 },
     { field: "didtyp", headerAlign: "center", headerName: "Type", flex: 2.5 },
@@ -576,7 +576,7 @@ const IvrsDidListTable = ({ handleShow }) => {
               <Button
                 variant="contained"
                 color="success"
-                onClick={() => handleOpenDialog(params.row)}
+                onClick={() => handleOpenStatusDialog(params.row)}
                 sx={{ mt: 1 }}
               >
                 Resume
@@ -590,7 +590,7 @@ const IvrsDidListTable = ({ handleShow }) => {
               <Button
                 variant="contained"
                 color="warning"
-                onClick={() => handleOpenDialog(params.row)}
+                onClick={() => handleOpenStatusDialog(params.row)}
                 sx={{ mt: 1 }}
               >
                 Suspend
@@ -647,7 +647,6 @@ const IvrsDidListTable = ({ handleShow }) => {
                       display="flex"
                       alignItems="center"
                       gap={2}
-                      p={1.5}
                       // bgcolor="#333"
                       // borderRadius={2}
                       // boxShadow={1}
@@ -692,6 +691,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                         />
                       </IconButton>
                       <Button
+                        size="small"
                         onClick={() => setOpenDrawer(true)}
                         sx={{
                           bgcolor: "#6a69ff",
@@ -703,8 +703,8 @@ const IvrsDidListTable = ({ handleShow }) => {
                           },
                         }}
                       >
-                        <AddSharpIcon sx={{ fontSize: 16 }} />
-                        <Typography>Add</Typography>
+                        <AddSharpIcon sx={{ fontSize: 14 }} />
+                        <Typography sx={{ fontSize: "14px" }}>Add</Typography>
                       </Button>
                     </Box>
                   </Box>
@@ -849,7 +849,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                     }
                     description={description}
                     onDescriptionChange={(e) => setDescription(e.target.value)}
-                    onUpdate={handleUpdate}
+                    onUpdate={handleStatusUpdate}
                   />
                 </Box>
 
@@ -882,7 +882,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                     <Button
                       variant="contained"
                       color="error"
-                      onClick={handleClose}
+                      onClick={handleCloseModules}
                     >
                       Close
                     </Button>

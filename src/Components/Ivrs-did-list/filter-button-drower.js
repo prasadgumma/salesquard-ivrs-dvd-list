@@ -503,7 +503,7 @@ const FilterDrawerMultiSelect = () => {
           }))
         );
 
-        toast.success("Data loaded successfully..");
+        toast.success("Data loaded successfully!");
       } else {
         throw new Error(response.data.resp.message);
       }

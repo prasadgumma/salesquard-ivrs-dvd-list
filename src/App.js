@@ -8,13 +8,13 @@ const App = () => {
   return (
     <FilterProvider>
       <Toaster
-        position="top-center"
+        position="top-right"
         toastOptions={{
           duration: 3000,
           style: {
             background: "#ffff",
             color: "#333",
-            fontSize: "18px",
+            fontSize: "16px",
             padding: "12px 12px",
             borderRadius: "4px",
           },
