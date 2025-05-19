@@ -177,7 +177,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Modal,
   Box,
   Typography,
   FormControl,
@@ -188,10 +187,11 @@ import {
   Button,
   Stack,
   Chip,
+  IconButton,
 } from "@mui/material";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { CheckCircle, Cancel } from "@mui/icons-material";
+import { CheckCircle, Cancel, CancelOutlined } from "@mui/icons-material";
 
 const modalStyle = {
   position: "absolute",
@@ -288,77 +288,92 @@ const SuspendAndResumeConfirmation = ({
       toast.error(`Network error: ${error.message}`);
     }
   };
+  const handleCancel = () => {
+    onClose();
+  };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box sx={modalStyle}>
-        <Typography variant="h5" fontWeight="600" mb={2}>
-          🔄 Update IVRS Status
-        </Typography>
+    // <Modal open={open}>
+    <Box sx={modalStyle}>
+      <IconButton
+        onClick={handleCancel}
+        sx={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          color: "#000",
+        }}
+      >
+        <CancelOutlined />
+      </IconButton>
 
-        <FormControl fullWidth margin="normal" size="small">
-          <InputLabel id="status-label">Choose Status</InputLabel>
-          <Select
-            labelId="status-label"
-            value={status}
-            label="Choose Status"
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <MenuItem value="resumed">
-              <Chip
-                icon={<CheckCircle color="success" />}
-                label="Resumed"
-                color="success"
-                variant="outlined"
-              />
-            </MenuItem>
-            <MenuItem value="suspended">
-              <Chip
-                icon={<Cancel color="error" />}
-                label="Suspended"
-                color="error"
-                variant="outlined"
-              />
-            </MenuItem>
-          </Select>
-        </FormControl>
+      <Typography variant="h5" fontWeight="600" mb={2}>
+        🔄 Update IVRS Status
+      </Typography>
 
-        <TextField
-          label="Optional Description"
-          placeholder="Add context or notes (optional)"
-          multiline
-          rows={4}
-          fullWidth
-          margin="normal"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          variant="outlined"
-        />
+      <FormControl fullWidth margin="normal" size="small">
+        <InputLabel id="status-label">Choose Status</InputLabel>
+        <Select
+          labelId="status-label"
+          value={status}
+          label="Choose Status"
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <MenuItem value="resumed">
+            <Chip
+              icon={<CheckCircle color="success" />}
+              label="Resumed"
+              color="success"
+              variant="contained"
+            />
+          </MenuItem>
+          <MenuItem value="suspended">
+            <Chip
+              icon={<Cancel color="error" />}
+              label="Suspended"
+              color="error"
+              variant="contained"
+            />
+          </MenuItem>
+        </Select>
+      </FormControl>
 
-        <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleUpdate}
-            sx={{ textTransform: "capitalize", borderRadius: 2 }}
-          >
-            Confirm
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              setDescription("");
-              setStatus("");
-              onClose();
-            }}
-            sx={{ textTransform: "capitalize", borderRadius: 2 }}
-          >
-            Cancel
-          </Button>
-        </Stack>
-      </Box>
-    </Modal>
+      <TextField
+        label="Optional Description"
+        placeholder="Add context or notes (optional)"
+        multiline
+        rows={4}
+        fullWidth
+        margin="normal"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        variant="outlined"
+      />
+
+      <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleUpdate}
+          sx={{ textTransform: "capitalize", borderRadius: 2 }}
+        >
+          Confirm
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => {
+            setDescription("");
+            setStatus("");
+            onClose();
+          }}
+          sx={{ textTransform: "capitalize", borderRadius: 2 }}
+        >
+          Cancel
+        </Button>
+      </Stack>
+    </Box>
+    // </Modal>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Typography,
   Box,
@@ -16,6 +16,7 @@ import {
   DialogActions,
   Modal,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Edit, Delete } from "@mui/icons-material";
@@ -23,7 +24,7 @@ import IvrsDidAddForm from "./Add-Did-Form";
 import IvrsDidEditForm from "./Edit-Did-Form";
 import axios from "axios";
 import MD5 from "crypto-js/md5";
-import StatusConfirmation from "./Confirmation-Dilogue";
+import StatusConfirmation from "./Status-Dilogue";
 import CustomPagination from "./CustomPagination";
 import TableBottomActions from "./Table-Bottom-Actions";
 import { FilterContext } from "../context/FilterProvider";
@@ -47,8 +48,8 @@ const modalStyle = {
 };
 
 const tableStyles = {
-  height: "76vh",
-  width: "100vw",
+  height: "75vh",
+  width: "97vw",
 
   "& .MuiDataGrid-root": {
     fontFamily: "mulish, sans-serif",
@@ -64,6 +65,7 @@ const tableStyles = {
     color: "#333",
     borderRight: "1px solid rgb(217, 211, 211)", // Add vertical lines in cells
     bgcolor: "#ffffff",
+    wordBreak: "break-word",
   },
 
   "& .MuiDataGrid-columnHeader": {
@@ -117,16 +119,17 @@ const tableStyles = {
 
 const IvrsDidListTable = ({ handleShow }) => {
   const { data, setData } = useContext(FilterContext);
-
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
+  const [openEditDrawer, setOpenEditDrawer] = useState(false);
+  const [openModules, setOpenModules] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const toggleDrawer = () => setOpenFilterDrawer(!openFilterDrawer);
   const [statusType, setStatusType] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [description, setDescription] = useState("");
   const [selectedModuleNames, setSelectedModuleNames] = useState([]);
-  const [openEditDrawer, setOpenEditDrawer] = useState(false);
   const [selectedDidData, setSelectedDidData] = useState(null);
-  const [open, setOpen] = useState(false);
   const [selectedModules, setSelectedModules] = useState([]);
   const [moduleOptions, setModuleOptions] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
@@ -137,18 +140,19 @@ const IvrsDidListTable = ({ handleShow }) => {
   const [filteredData, setFilteredData] = useState([]);
   const [searchText, setSearchText] = useState(""); // Search input
   const [openFilterDrawer, setOpenFilterDrawer] = useState(false);
-  const toggleDrawer = () => setOpenFilterDrawer(!openFilterDrawer);
-  const [openModal, setOpenModal] = useState(false);
   const apiurl = process.env.REACT_APP_API_URL; // Your API URL
   // For pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const totalRows = filteredData?.length;
-  const startIndex = (currentPage - 1) * pageSize;
+  const startIndex =
+    (currentPage - 1) * (pageSize === "All" ? totalRows : Number(pageSize));
+
   const paginatedRows =
     pageSize === "All"
       ? filteredData
-      : filteredData?.slice(startIndex, startIndex + pageSize);
+      : filteredData?.slice(startIndex, startIndex + Number(pageSize));
+
   const totalPages = pageSize === "All" ? 1 : Math.ceil(totalRows / pageSize);
 
   const handleNextPage = () => {
@@ -178,7 +182,7 @@ const IvrsDidListTable = ({ handleShow }) => {
       row.modnms ? row.modnms.split(",").map((n) => n.trim()) : []
     );
 
-    setOpen(true);
+    setOpenModules(true);
     axios
       .post(`${apiurl}/mtype_drp_did`, {
         lml: "67a455659d796",
@@ -242,12 +246,12 @@ const IvrsDidListTable = ({ handleShow }) => {
       // Reset state
       setEditingRow(null);
       setSelectedModules([]);
-      setOpen(false);
+      setOpenModules(false);
     }
   };
 
   const handleCloseModules = () => {
-    setOpen(false);
+    setOpenModules(false);
   };
 
   const handleOpenStatusDialog = (row) => {
@@ -469,7 +473,7 @@ const IvrsDidListTable = ({ handleShow }) => {
       field: "id",
       headerName: "S.No",
       type: "number",
-      flex: 2,
+      flex: 2.2,
     },
     {
       field: "accontid",
@@ -519,20 +523,20 @@ const IvrsDidListTable = ({ handleShow }) => {
         );
       },
     },
-    { field: "tspnm", headerAlign: "center", headerName: "TSP", flex: 2 },
+    { field: "tspnm", headerAlign: "center", headerName: "TSP", flex: 2.2 },
     {
       field: "didnum",
       headerAlign: "center",
       headerName: "DID Number",
       flex: 4,
     },
-    { field: "ver", headerAlign: "center", headerName: "Version", flex: 2.5 },
+    { field: "ver", headerAlign: "center", headerName: "Version", flex: 2.6 },
     { field: "didtyp", headerAlign: "center", headerName: "Type", flex: 2.5 },
     {
       field: "agtyp",
       headerName: "Agent Type",
       headerAlign: "center",
-      flex: 3.5,
+      flex: 3.6,
       renderCell: (params) => {
         if (params.value === 0) return "1st Number Agent";
         if (params.value === 1) return "2nd Number Agent";
@@ -550,7 +554,7 @@ const IvrsDidListTable = ({ handleShow }) => {
       field: "descr",
       headerAlign: "center",
       headerName: "Description",
-      flex: 3.5,
+      flex: 3.6,
     },
     {
       field: "stat",
@@ -635,22 +639,30 @@ const IvrsDidListTable = ({ handleShow }) => {
                     display="flex"
                     justifyContent="space-between"
                     alignItems="center"
-                    m={1}
+                    p={1}
+                    sx={{
+                      // background:
+                      //   "linear-gradient(90deg, #e3f2fd 0%,rgb(211, 235, 255) 100%)",
+                      // borderRadius: 1,
+                      boxShadow: 1,
+                      // mb: 2,
+                    }}
                   >
                     {/* Left Side - Title */}
-                    <Typography variant="h5" fontFamily="serif" color="#0d47a1">
+                    <Typography
+                      variant="h5"
+                      fontWeight={600}
+                      fontFamily="serif"
+                      color="#0d47a1"
+                      sx={{
+                        textShadow: "1px 1px 2px rgba(0,0,0,0.1)",
+                      }}
+                    >
                       IVRS DID List
                     </Typography>
 
-                    {/* Right Side - With Background */}
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      gap={2}
-                      // bgcolor="#333"
-                      // borderRadius={2}
-                      // boxShadow={1}
-                    >
+                    {/* Right Side - Search, Filter, Add, Delete */}
+                    <Box display="flex" alignItems="center" gap={2}>
                       {/* Search Field */}
                       <TextField
                         variant="outlined"
@@ -665,51 +677,69 @@ const IvrsDidListTable = ({ handleShow }) => {
                             </IconButton>
                           ),
                         }}
-                        sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                        sx={{
+                          backgroundColor: "#fff",
+                          borderRadius: 2,
+                          boxShadow: 1,
+                          minWidth: 200,
+                        }}
                       />
 
                       {/* Delete Icon */}
                       {selectedRows.length > 0 && (
                         <IconButton onClick={handleOpenDelete}>
                           <DeleteIcon color="error" sx={{ fontSize: 28 }} />
-                          <Typography color={"error"}>Delete</Typography>
+                          <Typography color="error" fontWeight={500}>
+                            Delete
+                          </Typography>
                         </IconButton>
                       )}
 
                       {/* Filter Icon */}
-                      <IconButton onClick={toggleDrawer}>
-                        <FilterListIcon
-                          sx={{
-                            fontSize: 34,
-                            color: "#6a69ff",
-                            transition: "0.3s",
-                            "&:hover": {
-                              color: "#6a69ff",
-                              transform: "scale(1.1)",
-                            },
-                          }}
-                        />
-                      </IconButton>
+                      <Tooltip title="Filter Options" placement="top">
+                        <IconButton onClick={toggleDrawer}>
+                          <FilterListIcon
+                            sx={{
+                              fontSize: 30,
+                              color: "#376abd",
+                              transition: "0.3s",
+                              "&:hover": {
+                                color: "#376abd",
+                                transform: "scale(1.1)",
+                              },
+                            }}
+                          />
+                        </IconButton>
+                      </Tooltip>
+
+                      {/* Add Button */}
                       <Button
                         size="small"
                         onClick={() => setOpenDrawer(true)}
+                        startIcon={<AddSharpIcon />}
+                        variant="contained"
+                        color="primary"
                         sx={{
-                          bgcolor: "#6a69ff",
-                          color: "#ffff",
+                          px: 1.5,
+                          py: 1,
+                          mr: 2,
+                          fontWeight: 500,
+                          fontSize: "14px",
+
+                          borderRadius: 1,
+                          boxShadow: 2,
                           "&:hover": {
-                            color: "#ffff",
-                            bgcolor: "#6a69ff",
-                            transform: "scale(1.1)",
+                            transform: "scale(1.04)",
+                            background: "#4572ba",
                           },
                         }}
                       >
-                        <AddSharpIcon sx={{ fontSize: 14 }} />
-                        <Typography sx={{ fontSize: "14px" }}>Add</Typography>
+                        Add
                       </Button>
                     </Box>
                   </Box>
 
-                  <Box sx={{ overflow: "auto" }}>
+                  <Box>
                     <DataGrid
                       rows={paginatedRows || []}
                       columns={columns}
@@ -726,6 +756,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                       }}
                       hideFooter
                       getRowHeight={() => "auto"}
+                      rowBuffer={500} // <-- Important to increase buffer
                       // paginationMode="server"
                       sx={tableStyles}
                     />
@@ -736,9 +767,13 @@ const IvrsDidListTable = ({ handleShow }) => {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
-                      backgroundColor: "#fff",
-                      borderTop: "1px solid #ccc",
-                      // common padding for the container
+                      backgroundColor: "#1f1f1f", // deeper neutral background
+                      borderTop: "1px solid #444",
+                      px: 2,
+                      py: 0.5,
+                      boxShadow: "0 -2px 6px rgba(0,0,0,0.2)",
+                      flexWrap: "wrap",
+                      rowGap: 2,
                     }}
                   >
                     {/* Left Section */}
@@ -746,26 +781,36 @@ const IvrsDidListTable = ({ handleShow }) => {
                       sx={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 3, // consistent gap between elements
-                        flexWrap: "wrap", // allow wrapping on smaller screens
-                        ml: 2,
+                        gap: 3,
+                        flexWrap: "wrap",
+                        color: "white",
                       }}
                     >
-                      <Typography variant="body2">
+                      <Typography variant="body2" sx={{ fontSize: "16px" }}>
                         Selected Rows:{" "}
-                        <strong>
+                        <Box
+                          component="span"
+                          sx={{ fontWeight: "bold", color: "#90caf9" }}
+                        >
                           {selectedRows?.length === data?.length
-                            ? "SelectedAll"
+                            ? "Selected All"
                             : selectedRows?.length}
-                        </strong>
+                        </Box>
                       </Typography>
-                      <Typography variant="body2">
-                        Total Rows: <strong>{data?.length}</strong>
+
+                      <Typography variant="body2" sx={{ fontSize: "16px" }}>
+                        Total Rows:{" "}
+                        <Box
+                          component="span"
+                          sx={{ fontWeight: "bold", color: "#aed581" }}
+                        >
+                          {data?.length}
+                        </Box>
                       </Typography>
 
                       {selectedRows.length > 0 && (
                         <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
                         >
                           <TableBottomActions
                             selectedRows={selectedRows}
@@ -773,25 +818,45 @@ const IvrsDidListTable = ({ handleShow }) => {
                             setSelectedIvrsRows={setSelectedIvrsRows}
                             selectedIvrsRows={selectedIvrsRows}
                           />
+
                           <Box
                             sx={{
                               display: "flex",
                               alignItems: "center",
-                              gap: 1,
                             }}
                           >
                             <Checkbox
                               checked={selectAll}
                               onChange={handleSelectAll}
+                              sx={{
+                                color: "#90caf9",
+                                "&.Mui-checked": {
+                                  color: "#64b5f6",
+                                },
+                              }}
                             />
-                            <Typography variant="body2">FOR ALL</Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: "15px",
+                                color: "#e0e0e0",
+                                fontWeight: 500,
+                              }}
+                            >
+                              FOR ALL
+                            </Typography>
                           </Box>
                         </Box>
                       )}
                     </Box>
 
                     {/* Right Section */}
-                    <Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                      }}
+                    >
                       <CustomPagination
                         currentPage={currentPage}
                         totalRows={totalRows}
@@ -853,7 +918,7 @@ const IvrsDidListTable = ({ handleShow }) => {
                   />
                 </Box>
 
-                <Dialog open={open} maxWidth="sm" fullWidth>
+                <Dialog open={openModules} maxWidth="sm" fullWidth>
                   <DialogTitle>Modules</DialogTitle>
                   <DialogContent>
                     <FormGroup>

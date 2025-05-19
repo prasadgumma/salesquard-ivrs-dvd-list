@@ -581,14 +581,15 @@ const FilterDrawerMultiSelect = () => {
 
   return (
     <FilterProvider tableDidData={tableDidData}>
-      <Box mt={0.5} mr={2} textAlign="end">
+      <Box mt={0.5} mr={5} textAlign="end">
         <Box
           p={2}
-          sx={{
-            width: "97%",
-            backgroundColor: "#f5f5f5",
-            borderRadius: "12px",
-          }}
+
+          // sx={{
+          //   width: "97%",
+          //   backgroundColor: "#f5f5f5",
+          //   borderRadius: "12px",
+          // }}
         >
           <Grid container alignItems="center" spacing={2} flexWrap="wrap">
             {dropdownConfigs.map((config, index) => (
@@ -664,7 +665,7 @@ const FilterDrawerMultiSelect = () => {
         </Box>
       </Box>
 
-      <Box>
+      <Box pl={2} pr={2}>
         {loading ? (
           <IvrsDidListTable
             tableDidData={tableDidData}

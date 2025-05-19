@@ -28,16 +28,21 @@ const CustomPagination = ({
       sx={{
         backgroundColor: "#f7f7f7", // Light background for the entire pagination section
         borderRadius: "8px",
-        padding: "10px",
+        padding: "7px",
       }}
     >
       {/* Page Size Selector */}
       <Box display={"flex"} gap={2}>
         <Typography
           variant="body2"
-          sx={{ fontWeight: "600", color: "#555", mt: 1 }}
+          sx={{
+            fontWeight: "600",
+            color: "#555",
+            fontSize: "16px",
+            mt: "2px",
+          }}
         >
-          Items per page:
+          Items Per Page:
         </Typography>
         <Select
           value={pageSize}
@@ -45,7 +50,7 @@ const CustomPagination = ({
           size="small"
           variant="outlined"
           sx={{
-            height: 36,
+            height: 30,
             width: 80,
             borderRadius: "5px",
             borderColor: "#ddd",
@@ -57,12 +62,12 @@ const CustomPagination = ({
           <MenuItem value={25}>25</MenuItem>
           <MenuItem value={50}>50</MenuItem>
           <MenuItem value={100}>100</MenuItem>
-          <MenuItem value="All">All</MenuItem>
+          {/* <MenuItem value="All">All</MenuItem> */}
         </Select>
       </Box>
 
       {/* Pagination Info */}
-      <Box sx={{ fontSize: 17, color: "#333", fontWeight: "500" }}>
+      <Box sx={{ fontSize: 17, color: "#333", fontWeight: "500", mb: 0.5 }}>
         {pageSize === "All"
           ? `1-${totalRows} of ${totalRows}` // Show all rows
           : `${startIndex + 1}-${Math.min(

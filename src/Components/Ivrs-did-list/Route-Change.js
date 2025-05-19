@@ -198,7 +198,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { GridCloseIcon } from "@mui/x-data-grid";
+import { CancelRounded } from "@mui/icons-material";
 
 const RouteChangeModel = ({
   onClose,
@@ -302,7 +302,7 @@ const RouteChangeModel = ({
           color: "#999",
         }}
       >
-        <GridCloseIcon />
+        <CancelRounded />
       </IconButton>
       <Typography
         variant="h6"
